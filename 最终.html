@@ -1,0 +1,1161 @@
+e
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互动式电子海洋</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .painting-area, .gallery-area {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .gallery-area {
+            flex: 0.7;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .section-title:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+        }
+        
+        .toolbar {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .tool-group label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        select, input, button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        button.clear {
+            background: #f44336;
+        }
+        
+        button.clear:hover {
+            background: #d32f2f;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 500px;
+        }
+        
+        #main-canvas {
+            display: block;
+            background: #1a2980;
+            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            padding: 10px;
+            flex: 1;
+            /* 删除固定高度，让画廊占据剩余所有空间 */
+        }
+        
+        .fish-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .fish-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .fish-preview {
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        
+        .fish-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .fish-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* 画廊场景样式 */
+        .gallery-scene {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            z-index: 2000;
+            padding: 20px;
+        }
+        
+        .gallery-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .gallery-background-selector {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .gallery-background-selector select {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        .back-btn {
+            background: #ff6b6b;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .back-btn:hover {
+            background: #ff5252;
+        }
+        
+        .ocean-scene {
+            position: relative;
+            height: calc(100vh - 100px);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .fish-in-ocean {
+            position: absolute;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .fish-in-ocean:hover {
+            transform: scale(1.2);
+        }
+        
+        .fish-popup {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        
+        /* 故事标签样式 */
+        .story-tag {
+            position: absolute;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            border-radius: 15px;
+            cursor: move;
+            z-index: 15;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tag-delete {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .story-tag:hover .tag-delete {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* 海底元素样式 */
+        .sea-element {
+            position: absolute;
+            font-size: 2rem;
+            cursor: move;
+            z-index: 12;
+        }
+        
+        .element-delete {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sea-element:hover .element-delete {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* 鱼轮廓参考样式 */
+        .fish-outline {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.3;
+            border: 2px dashed #fff;
+        }
+        
+        /* 背景选择样式 */
+        .background-option {
+            padding: 5px 10px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .background-option.selected {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .gallery-area {
+                flex: 1;
+            }
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .color-option.active {
+            border-color: white;
+            transform: scale(1.2);
+        }
+        
+        .brush-size {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .brush-size input {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌊 互动式电子海洋</h1>
+            <p class="subtitle">绘制您的海洋生物，与其他创作者的鱼儿共同游动在电子海洋中！</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="painting-area">
+                <h2 class="section-title">🎨 绘画区</h2>
+                
+                <div class="toolbar">
+                    <div class="tool-group">
+                        <label>画笔颜色</label>
+                        <div class="color-picker">
+                            <div class="color-option active" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #ff4757;" data-color="#ff4757"></div>
+                            <div class="color-option" style="background-color: #2ed573;" data-color="#2ed573"></div>
+                            <div class="color-option" style="background-color: #1e90ff;" data-color="#1e90ff"></div>
+                            <div class="color-option" style="background-color: #ffa502;" data-color="#ffa502"></div>
+                            <div class="color-option" style="background-color: #ffffff;" data-color="#ffffff"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>画笔大小</label>
+                        <div class="brush-size">
+                            <input type="range" id="brush-size" min="1" max="20" value="3">
+                            <span id="brush-size-value">3px</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>鱼轮廓参考</label>
+                        <select id="fish-outline">
+                            <option value="none">无参考</option>
+                            <option value="fish1">小鱼轮廓</option>
+                            <option value="fish2">鲨鱼轮廓</option>
+                            <option value="fish3">水母轮廓</option>
+                            <option value="fish4">海龟轮廓</option>
+                        </select>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>故事标签</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="tag-text" placeholder="输入标签内容（限20字）">
+                            <button id="add-tag">添加</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>海底元素</label>
+                        <select id="sea-element">
+                            <option value="none">选择元素</option>
+                            <option value="coral">珊瑚</option>
+                            <option value="seaweed">水草</option>
+                            <option value="rock">岩石</option>
+                            <option value="bubble">气泡</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="canvas-wrapper">
+                    <canvas id="main-canvas"></canvas>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <button id="submit-fish">提交我的鱼</button>
+                    <button id="clear-canvas" class="clear">清空画布</button>
+                    <button id="enter-gallery" style="background: linear-gradient(45deg, #00d2ff, #0072ff); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0, 114, 255, 0.3); transition: all 0.3s ease;">🐠 进入海洋生物画廊</button>
+                </div>
+            </div>
+            
+            <div class="gallery-area">
+                <h2 class="section-title" id="gallery-title">🐠 海洋生物画廊</h2>
+                <div class="gallery" id="fish-gallery">
+                    <!-- 示例鱼 -->
+                    <div class="fish-card">
+                        <div class="fish-preview">🐟</div>
+                        <div class="fish-name">小丑鱼尼莫</div>
+                        <div class="fish-desc">橙色条纹，活泼好动</div>
+                    </div>
+                    <div class="fish-card">
+                        <div class="fish-preview">🦈</div>
+                        <div class="fish-name">大白鲨</div>
+                        <div class="fish-desc">海洋霸主，威风凛凛</div>
+                    </div>
+                    <div class="fish-card">
+                        <div class="fish-preview">🐢</div>
+                        <div class="fish-name">海龟慢慢</div>
+                        <div class="fish-desc">长寿智者，悠然自得</div>
+                    </div>
+                    <div class="fish-card">
+                        <div class="fish-preview">🐙</div>
+                        <div class="fish-name">章鱼博士</div>
+                        <div class="fish-desc">八爪灵活，聪明机智</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 画廊场景 -->
+    <div class="gallery-scene" id="gallery-scene">
+        <div class="gallery-header">
+            <button class="back-btn" id="back-to-painting">← 返回绘画</button>
+            <h2>🐠 电子海洋场景</h2>
+            <div class="gallery-background-selector">
+                <select id="gallery-background-theme">
+                    <option value="spongebob">海绵宝宝场景</option>
+                    <option value="octonauts">海底小纵队场景</option>
+                    <option value="nemo">海底总动员场景</option>
+                </select>
+            </div>
+        </div>
+        <div class="ocean-scene" id="ocean-scene">
+            <div class="fish-popup" id="fish-popup"></div>
+        </div>
+    </div>
+    
+    <!-- 提交鱼的模态框 -->
+    <div id="fish-modal" class="modal">
+        <div class="modal-content">
+            <h3>提交您的海洋生物</h3>
+            <input type="text" id="fish-name" class="modal-input" placeholder="输入生物名称（如：小丑鱼尼莫）">
+            <input type="text" id="fish-description" class="modal-input" placeholder="输入生物描述（限20字）">
+            <div class="modal-buttons">
+                <button id="cancel-submit" class="clear">取消</button>
+                <button id="confirm-submit">确认提交</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 确保DOM完全加载后再执行事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 先获取所有需要的DOM元素
+            const canvas = document.getElementById('main-canvas');
+            const ctx = canvas.getContext('2d');
+            const brushSizeInput = document.getElementById('brush-size');
+            const brushSizeValue = document.getElementById('brush-size-value');
+            const submitFishBtn = document.getElementById('submit-fish');
+            const fishModal = document.getElementById('fish-modal');
+            const cancelSubmitBtn = document.getElementById('cancel-submit');
+            const confirmSubmitBtn = document.getElementById('confirm-submit');
+            const enterGalleryBtn = document.getElementById('enter-gallery');
+            const backToPaintingBtn = document.getElementById('back-to-painting');
+            const galleryTitle = document.getElementById('gallery-title');
+            const galleryScene = document.getElementById('gallery-scene');
+            const oceanScene = document.getElementById('ocean-scene');
+            const fishPopup = document.getElementById('fish-popup');
+            const galleryBackgroundTheme = document.getElementById('gallery-background-theme');
+            const fishOutlineSelect = document.getElementById('fish-outline');
+            const addTagBtn = document.getElementById('add-tag');
+            const tagTextInput = document.getElementById('tag-text');
+            const seaElementSelect = document.getElementById('sea-element');
+            const clearCanvasBtn = document.getElementById('clear-canvas');
+            const fishGallery = document.getElementById('fish-gallery');
+            
+            // 全局变量
+            let currentOutline = null;
+            let storyTags = [];
+            let seaElements = [];
+            let userFish = [];
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let currentColor = '#000000';
+            let brushSize = 3;
+            let currentGalleryBackground = 'spongebob';
+            let galleryBackgroundImages = {};
+            
+            // 海洋画廊背景数据（使用用户提供的本地图片）
+            const galleryBackgrounds = {
+                spongebob: {
+                    image: 'imgs/gallery_backgrounds/spongebob_bg.png',
+                    name: '海绵宝宝场景'
+                },
+                octonauts: {
+                    image: 'imgs/gallery_backgrounds/octonauts_bg.jpg',
+                    name: '海底小纵队场景'
+                },
+                nemo: {
+                    image: 'imgs/gallery_backgrounds/finding_nemo_bg.jpg',
+                    name: '海底总动员场景'
+                }
+            };
+            
+            // 设置Canvas尺寸
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                
+                // 重新绘制背景
+                drawBackground();
+                
+                // 重新绘制鱼轮廓参考
+                if (currentOutline) {
+                    drawFishOutline(currentOutline);
+                }
+            }
+            
+            // 绘制海洋背景（删除背景主题切换，保持默认海洋背景）
+            function drawBackground() {
+                // 使用固定的海洋渐变背景
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#1a2980');
+                gradient.addColorStop(1, '#26d0ce');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制气泡
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    const radius = Math.random() * 10 + 5;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.stroke();
+                }
+            }
+            
+            // 预加载画廊背景图片
+            function preloadGalleryImage(imagePath) {
+                if (galleryBackgroundImages[imagePath]) return;
+                
+                const img = new Image();
+                img.onload = function() {
+                    galleryBackgroundImages[imagePath] = img;
+                    // 如果当前背景就是这张图片，立即更新背景
+                    if (galleryBackgrounds[currentGalleryBackground].image === imagePath) {
+                        drawGalleryBackground();
+                    }
+                };
+                img.onerror = function() {
+                    console.log('画廊背景图片加载失败:', imagePath);
+                };
+                img.src = imagePath;
+            }
+            
+            // 预加载所有画廊背景图片
+            function preloadAllGalleryBackgrounds() {
+                Object.keys(galleryBackgrounds).forEach(bgKey => {
+                    const bg = galleryBackgrounds[bgKey];
+                    if (bg.image) {
+                        preloadGalleryImage(bg.image);
+                    }
+                });
+            }
+            
+            // 绘制画廊背景
+            function drawGalleryBackground() {
+                const bg = galleryBackgrounds[currentGalleryBackground];
+                
+                // 设置背景图片
+                if (bg.image && galleryBackgroundImages[bg.image]) {
+                    oceanScene.style.backgroundImage = `url(${bg.image})`;
+                    oceanScene.style.backgroundSize = 'cover';
+                    oceanScene.style.backgroundPosition = 'center';
+                    oceanScene.style.backgroundRepeat = 'no-repeat';
+                } else if (bg.image) {
+                    // 如果图片还未加载，尝试加载
+                    preloadGalleryImage(bg.image);
+                }
+            }
+            
+            // 初始化Canvas
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 启动预加载
+            preloadAllGalleryBackgrounds();
+            
+            // 设置画笔颜色
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    currentColor = this.getAttribute('data-color');
+                });
+            });
+            
+            // 设置画笔大小
+            brushSizeInput.addEventListener('input', function() {
+                brushSize = this.value;
+                brushSizeValue.textContent = brushSize + 'px';
+            });
+            
+            // 绘画功能
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = brushSize;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            // 清空画布功能（保留故事标签）
+            clearCanvasBtn.addEventListener('click', function() {
+                if (confirm('确定要清空画布吗？已添加的故事标签将保留。')) {
+                    // 清空画布但保留标签
+                    drawBackground();
+                    removeAllSeaElements();
+                }
+            });
+            
+            // 进入海洋生物画廊按钮
+            enterGalleryBtn.addEventListener('click', function() {
+                showGalleryScene();
+            });
+            
+            // 故事标签功能
+            addTagBtn.addEventListener('click', function() {
+                const tagText = tagTextInput.value.trim();
+                if (tagText && tagText.length <= 20) {
+                    const tag = document.createElement('div');
+                    tag.className = 'story-tag';
+                    tag.innerHTML = `
+                        <span>${tagText}</span>
+                        <button class="tag-delete" title="删除标签">×</button>
+                    `;
+                    
+                    tag.style.left = Math.random() * (canvas.width - 120) + 'px';
+                    tag.style.top = Math.random() * (canvas.height - 40) + 'px';
+                    
+                    canvas.parentElement.appendChild(tag);
+                    
+                    // 使标签可拖动
+                    makeDraggable(tag);
+                    
+                    // 添加删除功能
+                    tag.querySelector('.tag-delete').addEventListener('click', function() {
+                        tag.remove();
+                    });
+                    
+                    storyTags.push(tag);
+                    tagTextInput.value = '';
+                } else {
+                    alert('请输入有效的标签内容（限20字）');
+                }
+            });
+            
+            // 海底元素功能
+            seaElementSelect.addEventListener('change', function() {
+                const elementType = this.value;
+                if (elementType !== 'none') {
+                    addSeaElement(elementType);
+                }
+            });
+            
+            function addSeaElement(type) {
+                const element = document.createElement('div');
+                element.className = 'sea-element';
+                
+                let emoji, title;
+                switch(type) {
+                    case 'coral':
+                        emoji = '🪸';
+                        title = '珊瑚';
+                        break;
+                    case 'seaweed':
+                        emoji = '🌿';
+                        title = '水草';
+                        break;
+                    case 'rock':
+                        emoji = '🪨';
+                        title = '岩石';
+                        break;
+                    case 'bubble':
+                        emoji = '💧';
+                        title = '气泡';
+                        break;
+                }
+                
+                element.innerHTML = `
+                    ${emoji}
+                    <button class="element-delete" title="删除元素">×</button>
+                `;
+                
+                element.style.left = Math.random() * (canvas.width - 60) + 'px';
+                element.style.top = Math.random() * (canvas.height - 60) + 'px';
+                
+                canvas.parentElement.appendChild(element);
+                
+                // 使元素可拖动
+                makeDraggable(element);
+                
+                // 添加删除功能
+                element.querySelector('.element-delete').addEventListener('click', function() {
+                    element.remove();
+                    seaElements = seaElements.filter(el => el !== element);
+                });
+                
+                seaElements.push(element);
+            }
+            
+            function removeAllSeaElements() {
+                seaElements.forEach(element => {
+                    element.remove();
+                });
+                seaElements = [];
+            }
+            
+            // 鱼轮廓参考功能
+            fishOutlineSelect.addEventListener('change', function() {
+                const outlineType = this.value;
+                removeFishOutline();
+                
+                if (outlineType !== 'none') {
+                    drawFishOutline(outlineType);
+                    currentOutline = outlineType;
+                } else {
+                    currentOutline = null;
+                }
+            });
+            
+            function drawFishOutline(type) {
+                const outline = document.createElement('div');
+                outline.className = 'fish-outline';
+                
+                let size, shape;
+                switch(type) {
+                    case 'fish1': // 小鱼
+                        size = {width: 80, height: 40};
+                        shape = 'ellipse';
+                        break;
+                    case 'fish2': // 鲨鱼
+                        size = {width: 120, height: 50};
+                        shape = 'rectangle';
+                        break;
+                    case 'fish3': // 水母
+                        size = {width: 60, height: 80};
+                        shape = 'circle';
+                        break;
+                    case 'fish4': // 海龟
+                        size = {width: 70, height: 60};
+                        shape = 'ellipse';
+                        break;
+                }
+                
+                outline.style.width = size.width + 'px';
+                outline.style.height = size.height + 'px';
+                outline.style.left = (canvas.width / 2 - size.width / 2) + 'px';
+                outline.style.top = (canvas.height / 2 - size.height / 2) + 'px';
+                
+                if (shape === 'ellipse') {
+                    outline.style.borderRadius = '50%';
+                } else if (shape === 'circle') {
+                    outline.style.borderRadius = '50%';
+                }
+                
+                canvas.parentElement.appendChild(outline);
+            }
+            
+            function removeFishOutline() {
+                const outline = document.querySelector('.fish-outline');
+                if (outline) {
+                    outline.remove();
+                }
+            }
+            
+            // 使元素可拖动
+            function makeDraggable(element) {
+                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+                
+                element.onmousedown = dragMouseDown;
+                
+                function dragMouseDown(e) {
+                    e.preventDefault();
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                    document.onmouseup = closeDragElement;
+                    document.onmousemove = elementDrag;
+                }
+                
+                function elementDrag(e) {
+                    e.preventDefault();
+                    pos1 = pos3 - e.clientX;
+                    pos2 = pos4 - e.clientY;
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                    
+                    const newTop = element.offsetTop - pos2;
+                    const newLeft = element.offsetLeft - pos1;
+                    
+                    // 确保元素在画布范围内
+                    const maxTop = canvas.parentElement.clientHeight - element.offsetHeight;
+                    const maxLeft = canvas.parentElement.clientWidth - element.offsetWidth;
+                    
+                    element.style.top = Math.max(0, Math.min(newTop, maxTop)) + "px";
+                    element.style.left = Math.max(0, Math.min(newLeft, maxLeft)) + "px";
+                }
+                
+                function closeDragElement() {
+                    document.onmouseup = null;
+                    document.onmousemove = null;
+                }
+            }
+            
+            // 画廊功能
+            galleryTitle.addEventListener('click', function() {
+                showGalleryScene();
+            });
+            
+            function showGalleryScene() {
+                document.querySelector('.container').style.display = 'none';
+                galleryScene.style.display = 'block';
+                
+                // 设置默认背景
+                currentGalleryBackground = 'spongebob';
+                
+                // 清空海洋场景
+                oceanScene.innerHTML = '<div class="fish-popup" id="fish-popup"></div>';
+                
+                // 绘制画廊背景
+                drawGalleryBackground();
+                
+                // 显示用户提交的鱼
+                userFish.forEach((fish, index) => {
+                    createSwimmingFish(fish, index);
+                });
+                
+                // 添加示例鱼
+                const exampleFish = [
+                    {emoji: '🐟', name: '小丑鱼尼莫', description: '橙色条纹，活泼好动'},
+                    {emoji: '🦈', name: '大白鲨', description: '海洋霸主，威风凛凛'},
+                    {emoji: '🐢', name: '海龟慢慢', description: '长寿智者，悠然自得'},
+                    {emoji: '🐙', name: '章鱼博士', description: '八爪灵活，聪明机智'}
+                ];
+                
+                exampleFish.forEach((fish, index) => {
+                    createSwimmingFish(fish, userFish.length + index);
+                });
+            }
+            
+            function createSwimmingFish(fish, index) {
+                const fishElement = document.createElement('div');
+                fishElement.className = 'fish-in-ocean';
+                fishElement.innerHTML = fish.emoji;
+                fishElement.style.left = Math.random() * 80 + '%';
+                fishElement.style.top = Math.random() * 70 + 10 + '%';
+                fishElement.dataset.fishData = JSON.stringify(fish);
+                
+                // 添加点击事件显示描述
+                fishElement.addEventListener('click', function(e) {
+                    showFishPopup(fish, e);
+                });
+                
+                oceanScene.appendChild(fishElement);
+                
+                // 添加游动动画
+                setTimeout(() => {
+                    animateFish(fishElement);
+                }, index * 500);
+            }
+            
+            function animateFish(fishElement) {
+                const sceneWidth = oceanScene.clientWidth;
+                const sceneHeight = oceanScene.clientHeight;
+                
+                let x = parseFloat(fishElement.style.left) || Math.random() * (sceneWidth - 60);
+                let y = parseFloat(fishElement.style.top) || Math.random() * (sceneHeight - 60);
+                let vx = (Math.random() - 0.5) * 2;
+                let vy = (Math.random() - 0.5) * 1;
+                
+                function swim() {
+                    x += vx;
+                    y += vy;
+                    
+                    // 边界检测
+                    if (x <= 0 || x >= sceneWidth - 60) {
+                        vx = -vx;
+                    }
+                    if (y <= 10 || y >= sceneHeight - 80) {
+                        vy = -vy;
+                    }
+                    
+                    fishElement.style.left = x + 'px';
+                    fishElement.style.top = y + 'px';
+                    
+                    requestAnimationFrame(swim);
+                }
+                
+                swim();
+            }
+            
+            function showFishPopup(fish, event) {
+                fishPopup.textContent = fish.description;
+                fishPopup.style.display = 'block';
+                fishPopup.style.left = (event.pageX - fishPopup.offsetWidth / 2) + 'px';
+                fishPopup.style.top = (event.pageY - 40) + 'px';
+                
+                setTimeout(() => {
+                    fishPopup.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 返回绘画界面
+            backToPaintingBtn.addEventListener('click', function() {
+                document.querySelector('.container').style.display = 'flex';
+                galleryScene.style.display = 'none';
+            });
+            
+            // 画廊背景切换
+            galleryBackgroundTheme.addEventListener('change', function() {
+                currentGalleryBackground = this.value;
+                drawGalleryBackground();
+            });
+            
+            // 提交鱼功能
+            submitFishBtn.addEventListener('click', function() {
+                fishModal.style.display = 'flex';
+            });
+            
+            cancelSubmitBtn.addEventListener('click', function() {
+                fishModal.style.display = 'none';
+            });
+            
+            confirmSubmitBtn.addEventListener('click', function() {
+                const fishName = document.getElementById('fish-name').value.trim();
+                const fishDescription = document.getElementById('fish-description').value.trim();
+                
+                if (fishName && fishDescription && fishDescription.length <= 20) {
+                    // 随机选择鱼的表情符号
+                    const fishEmojis = ['🐟', '🐠', '🐡', '🦈', '🐢', '🐙', '🦀', '🦐', '🦑', '🐬', '🐋', '🦞'];
+                    const randomEmoji = fishEmojis[Math.floor(Math.random() * fishEmojis.length)];
+                    
+                    const newFish = {
+                        emoji: randomEmoji,
+                        name: fishName,
+                        description: fishDescription
+                    };
+                    
+                    // 添加到用户鱼列表
+                    userFish.push(newFish);
+                    
+                    // 创建新的鱼卡片
+                    const fishCard = document.createElement('div');
+                    fishCard.className = 'fish-card';
+                    fishCard.innerHTML = `
+                        <div class="fish-preview">${randomEmoji}</div>
+                        <div class="fish-name">${fishName}</div>
+                        <div class="fish-desc">${fishDescription}</div>
+                    `;
+                    
+                    fishGallery.prepend(fishCard);
+                    
+                    // 关闭模态框
+                    fishModal.style.display = 'none';
+                    
+                    // 清空输入框
+                    document.getElementById('fish-name').value = '';
+                    document.getElementById('fish-description').value = '';
+                    
+                    // 显示成功消息
+                    alert(`"${fishName}" 已成功添加到海洋画廊！点击画廊标题查看电子海洋场景。`);
+                } else {
+                    alert('请填写完整的鱼类信息！（描述限20字）');
+                }
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(e) {
+                if (e.target === fishModal) {
+                    fishModal.style.display = 'none';
+                }
+            });
+        }); // DOMContentLoaded结束
+    </script>
+</body>
+</html>
