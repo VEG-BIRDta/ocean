@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海洋绘画互动平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .painting-area, .gallery-area {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .gallery-area {
+            flex: 0.7;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .toolbar {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .tool-group label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        select, input, button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 0.9rem;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        button.clear {
+            background: #f44336;
+        }
+        
+        button.clear:hover {
+            background: #d32f2f;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 500px;
+        }
+        
+        #main-canvas {
+            display: block;
+            background: #1a2980;
+            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            max-height: 500px;
+            padding: 10px;
+        }
+        
+        .fish-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .fish-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .fish-preview {
+            width: 100%;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        
+        .fish-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .fish-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .gallery-area {
+                flex: 1;
+            }
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .color-option.active {
+            border-color: white;
+            transform: scale(1.2);
+        }
+        
+        .brush-size {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .brush-size input {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌊 海洋绘画互动平台</h1>
+            <p class="subtitle">绘制您心中的海洋生物，创建属于您的海底世界！</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="painting-area">
+                <h2 class="section-title">🎨 绘画区</h2>
+                
+                <div class="toolbar">
+                    <div class="tool-group">
+                        <label>画笔颜色</label>
+                        <div class="color-picker">
+                            <div class="color-option active" style="background-color: #000000;" data-color="#000000"></div>
+                            <div class="color-option" style="background-color: #ff4757;" data-color="#ff4757"></div>
+                            <div class="color-option" style="background-color: #2ed573;" data-color="#2ed573"></div>
+                            <div class="color-option" style="background-color: #1e90ff;" data-color="#1e90ff"></div>
+                            <div class="color-option" style="background-color: #ffa502;" data-color="#ffa502"></div>
+                            <div class="color-option" style="background-color: #ffffff;" data-color="#ffffff"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>画笔大小</label>
+                        <div class="brush-size">
+                            <input type="range" id="brush-size" min="1" max="20" value="3">
+                            <span id="brush-size-value">3px</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>鱼轮廓参考</label>
+                        <select id="fish-type">
+                            <option value="none">无参考</option>
+                            <option value="fish1">小鱼轮廓</option>
+                            <option value="fish2">鲨鱼轮廓</option>
+                            <option value="fish3">水母轮廓</option>
+                            <option value="fish4">海龟轮廓</option>
+                        </select>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>故事标签</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="tag-text" placeholder="输入标签内容">
+                            <button id="add-tag">添加</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label>海底元素</label>
+                        <select id="sea-element">
+                            <option value="none">选择元素</option>
+                            <option value="coral">珊瑚</option>
+                            <option value="seaweed">水草</option>
+                            <option value="rock">岩石</option>
+                            <option value="bubble">气泡</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="canvas-wrapper">
+                    <canvas id="main-canvas"></canvas>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button id="submit-fish">提交我的鱼</button>
+                    <button id="clear-canvas" class="clear">清空画布</button>
+                </div>
+            </div>
+            
+            <div class="gallery-area">
+                <h2 class="section-title">🐠 海洋生物画廊</h2>
+                <div class="gallery" id="fish-gallery">
+                    <!-- 示例鱼 -->
+                    <div class="fish-card">
+                        <div class="fish-preview">🐟</div>
+                        <div class="fish-name">小丑鱼尼莫</div>
+                        <div class="fish-desc">橙色条纹，活泼好动</div>
+                    </div>
+                    <div class="fish-card">
+                        <div class="fish-preview">🦈</div>
+                        <div class="fish-name">大白鲨</div>
+                        <div class="fish-desc">海洋霸主，威风凛凛</div>
+                    </div>
+                    <div class="fish-card">
+                        <div class="fish-preview">🐢</div>
+                        <div class="fish-name">海龟慢慢</div>
+                        <div class="fish-desc">长寿智者，悠然自得</div>
+                    </div>
+                    <div class="fish-card">
+                        <div class="fish-preview">🐙</div>
+                        <div class="fish-name">章鱼博士</div>
+                        <div class="fish-desc">八爪灵活，聪明机智</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 提交鱼的模态框 -->
+    <div id="fish-modal" class="modal">
+        <div class="modal-content">
+            <h3>提交您的海洋生物</h3>
+            <input type="text" id="fish-id" class="modal-input" placeholder="输入生物名称（如：小丑鱼尼莫）">
+            <input type="text" id="fish-description" class="modal-input" placeholder="输入生物描述（限20字）">
+            <div class="modal-buttons">
+                <button id="cancel-submit" class="clear">取消</button>
+                <button id="confirm-submit">确认提交</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 获取Canvas和上下文
+        const canvas = document.getElementById('main-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 设置Canvas尺寸
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // 绘制背景
+            drawBackground();
+        }
+        
+        // 绘制海洋背景
+        function drawBackground() {
+            // 蓝色渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1a2980');
+            gradient.addColorStop(1, '#26d0ce');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制一些气泡
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 10 + 5;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.stroke();
+            }
+        }
+        
+        // 初始化Canvas
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // 绘画变量
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentColor = '#000000';
+        let brushSize = 3;
+        
+        // 设置画笔颜色
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                this.classList.add('active');
+                currentColor = this.getAttribute('data-color');
+            });
+        });
+        
+        // 设置画笔大小
+        const brushSizeInput = document.getElementById('brush-size');
+        const brushSizeValue = document.getElementById('brush-size-value');
+        
+        brushSizeInput.addEventListener('input', function() {
+            brushSize = this.value;
+            brushSizeValue.textContent = brushSize + 'px';
+        });
+        
+        // 绘画功能
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        // 清空画布
+        document.getElementById('clear-canvas').addEventListener('click', function() {
+            if (confirm('确定要清空画布吗？')) {
+                drawBackground();
+            }
+        });
+        
+        // 添加故事标签
+        document.getElementById('add-tag').addEventListener('click', function() {
+            const tagText = document.getElementById('tag-text').value.trim();
+            if (tagText) {
+                const tag = document.createElement('div');
+                tag.className = 'story-tag';
+                tag.textContent = tagText;
+                tag.style.position = 'absolute';
+                tag.style.left = Math.random() * (canvas.width - 100) + 'px';
+                tag.style.top = Math.random() * (canvas.height - 30) + 'px';
+                tag.style.padding = '5px 10px';
+                tag.style.background = 'rgba(255, 255, 255, 0.8)';
+                tag.style.color = '#000';
+                tag.style.borderRadius = '15px';
+                tag.style.cursor = 'move';
+                tag.style.zIndex = '10';
+                
+                canvas.parentElement.appendChild(tag);
+                
+                // 使标签可拖动
+                makeDraggable(tag);
+                
+                document.getElementById('tag-text').value = '';
+            }
+        });
+        
+        // 使元素可拖动
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            element.onmousedown = dragMouseDown;
+            
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+            
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+            
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+        
+        // 提交鱼功能
+        const submitFishBtn = document.getElementById('submit-fish');
+        const fishModal = document.getElementById('fish-modal');
+        const cancelSubmitBtn = document.getElementById('cancel-submit');
+        const confirmSubmitBtn = document.getElementById('confirm-submit');
+        
+        submitFishBtn.addEventListener('click', function() {
+            fishModal.style.display = 'flex';
+        });
+        
+        cancelSubmitBtn.addEventListener('click', function() {
+            fishModal.style.display = 'none';
+        });
+        
+        confirmSubmitBtn.addEventListener('click', function() {
+            const fishId = document.getElementById('fish-id').value.trim();
+            const fishDescription = document.getElementById('fish-description').value.trim();
+            
+            if (fishId && fishDescription) {
+                // 创建新的鱼卡片
+                const fishCard = document.createElement('div');
+                fishCard.className = 'fish-card';
+                
+                // 随机选择鱼的表情符号
+                const fishEmojis = ['🐟', '🐠', '🐡', '🦈', '🐢', '🐙', '🦀', '🦐', '🦑', '🐬', '🐋', '🦞'];
+                const randomEmoji = fishEmojis[Math.floor(Math.random() * fishEmojis.length)];
+                
+                fishCard.innerHTML = `
+                    <div class="fish-preview">${randomEmoji}</div>
+                    <div class="fish-name">${fishId}</div>
+                    <div class="fish-desc">${fishDescription}</div>
+                `;
+                
+                document.getElementById('fish-gallery').prepend(fishCard);
+                
+                // 关闭模态框
+                fishModal.style.display = 'none';
+                
+                // 清空输入框
+                document.getElementById('fish-id').value = '';
+                document.getElementById('fish-description').value = '';
+                
+                // 显示成功消息
+                alert(`"${fishId}" 已成功添加到海洋画廊！`);
+            } else {
+                alert('请填写完整的鱼类信息！');
+            }
+        });
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(e) {
+            if (e.target === fishModal) {
+                fishModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
