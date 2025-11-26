@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>互动式电子海洋</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+ <!-- ① 首页 -->
+<section id="home" class="screen">
+  <h1>互动式电子海洋</h1>
+  <!-- 移除首页的贝壳数量显示 -->
+  <div class="image-frame">
+    <img src="assets/home-image.png" alt="海洋场景" class="frame-image">
+  </div>
+  <div class="button-group">
+    <button id="btnStart" class="btn">开始绘画</button>
+    <button id="goToSeaFromHome" class="btn">进入海洋</button>
+  </div>
+</section>
+
+  <!-- ② 画板 -->
+  <section id="draw" class="screen hidden">
+    <h2>画一条你的小鱼</h2>
+    <!-- 贝壳数量显示 -->
+    <div class="shell-count">贝壳数量: <span id="shellCountDraw">0</span></div>
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <div class="toolbar">
+      <input type="color" id="color" value="#409eff">
+      <input type="range" id="lineWidth" min="2" max="20" value="4">
+      <button id="undo" class="btn">撤销</button>
+      <button id="eraser" class="btn">橡皮</button>
+      <button id="clear" class="btn">清空</button>
+      <button id="submit" class="btn">完成 / 提交</button>
+      <!-- 商店按钮 -->
+      <button id="goToStore" class="btn">商店</button>
+      <!-- 可选：添加直接进入海洋的按钮 -->
+      <button id="goToSea" class="btn">进入海洋</button>
+    </div>
+
+    <div class="storyBox">
+      <input id="fishName" maxlength="12" placeholder="给小鱼起名字（12字内）">
+      <input id="story" maxlength="20" placeholder="一句20字内介绍">
+    </div>
+  </section>
+
+  <!-- ③ 海洋 -->
+ <section id="sea" class="screen hidden">
+  <canvas id="ocean"></canvas>
+  <!-- 贝壳数量显示 -->
+  <div class="shell-count">贝壳数量: <span id="shellCountSea">0</span></div>
+  <!-- 返回按钮 -->
+  <button id="back" class="btn">← 返回绘画</button>
+  <!-- 管理小鱼按钮 -->
+  <button id="showFishes" class="btn fish-manage-btn">管理小鱼</button>
+  <!-- 小鱼列表面板 -->
+  <div id="fishListPanel" class="fish-list-panel">
+    <h3>我的小鱼列表</h3>
+    <div id="fishItems" class="fish-items"></div>
+  </div>
+</section>
+
+  <!-- ④ 商店 -->
+  <section id="store" class="screen hidden">
+    <div class="store-container">
+      <h2>海洋商店</h2>
+      <div class="shell-count">贝壳数量: <span id="shellCountStore">0</span></div>
+      
+      <div class="store-categories">
+        <button class="category-btn active" data-category="characters">角色</button>
+        <button class="category-btn" data-category="items">物品</button>
+      </div>
+      
+      <div class="store-items">
+        <!-- 角色商品 -->
+        <div class="items-category characters active">
+          <div class="store-item" data-id="spongebob" data-price="50">
+            <div class="item-image">
+              <img src="assets/spongebob.png" alt="海绵宝宝" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海绵宝宝</h3>
+              <p>快乐的海绵宝宝，永远乐观！</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="patrick" data-price="50">
+            <div class="item-image">
+              <img src="assets/patrick.png" alt="派大星" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>派大星</h3>
+              <p>海绵宝宝的好朋友，有点呆萌</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+        
+        <!-- 物品商品 -->
+        <div class="items-category items">
+          <div class="store-item" data-id="seaweed" data-price="20">
+            <div class="item-image">
+              <img src="assets/seaweed.png" alt="海草" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海草</h3>
+              <p>随波摇曳的绿色海草</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="reef" data-price="30">
+            <div class="item-image">
+              <img src="assets/reef.png" alt="礁石" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>礁石</h3>
+              <p>色彩斑斓的珊瑚礁</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      </div>
+      
+      <button id="backFromStore" class="btn back-btn">← 返回绘画</button>
+    </div>
+  </section>
+
+  <!-- 所有脚本放在最底部，保证 DOM 已加载 -->
+  <script src="js/common.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/ocean.js"></script>
+  <script src="js/store.js"></script>
+</body>
+</html>

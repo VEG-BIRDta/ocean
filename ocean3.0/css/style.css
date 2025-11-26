@@ -1,0 +1,705 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body, html {
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a91ff 0%, #0052cc 100%);
+}
+
+/* 白色方框容器 */
+.image-frame {
+  width: 90%;
+  max-width: 800px;
+  height: 500px;
+  margin: 2rem auto;
+  padding: 10px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.frame-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* 按钮组样式 */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* 贝壳数量显示样式 */
+.shell-count {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #ff6b35;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+/* 海洋界面的贝壳数量显示 - 放在上方 */
+#sea .shell-count {
+  top: 20px;
+  right: 20px;
+}
+
+/* 泡泡样式 */
+.bubble {
+  position: absolute;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.2s ease;
+  pointer-events: auto;
+}
+
+.bubble:hover {
+  transform: scale(1.1);
+}
+
+.bubble.popped {
+  animation: pop 0.3s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* 贝壳获得的动画 */
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-30px) scale(1.2);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-60px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.shell-gain-animation {
+  animation: floatUp 1.5s ease-out forwards;
+  font-family: 'Arial', sans-serif;
+  color: #8b5cf6 !important;
+  font-weight: bold;
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4);
+  z-index: 1000 !important;
+}
+
+/* 页面过渡动画 */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 1;
+}
+
+.screen.hidden {
+  display: none !important;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* 小鱼气泡样式 */
+.fish-bubble {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 10px 15px;
+  min-width: 150px;
+  max-width: 250px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  pointer-events: none;
+  z-index: 10;
+  transition: 
+    opacity 0.3s ease-out, 
+    left 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+    top 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: bubbleFloat 3s ease-in-out infinite;
+}
+
+@keyframes bubbleFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+.fish-bubble::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+}
+.fish-bubble.left::after {
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: rgba(255, 255, 255, 0.9);
+}
+.fish-bubble.right::after {
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: rgba(255, 255, 255, 0.9);
+}
+
+.fish-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 3px;
+}
+
+.fish-story {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* 首页样式 */
+#home {
+  background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+  gap: 2rem;
+  padding: 2rem;
+}
+
+#home h1 {
+  font-size: 3rem;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* 按钮样式 */
+.btn {
+  background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.5);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* 画板样式 */
+#draw {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+#draw h2 {
+  color: #333;
+  font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+}
+
+#canvas {
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: white;
+  cursor: crosshair;
+}
+
+/* 工具栏样式 */
+.toolbar {
+  margin-top: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: rgba(255,255,255,0.8);
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.toolbar input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 3px;
+  background: transparent;
+}
+
+.toolbar input[type="range"] {
+  width: 100px;
+}
+
+.toolbar button {
+  background: #409eff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar button:hover {
+  background: #66b1ff;
+}
+
+.toolbar button#submit {
+  background: #52c41a;
+}
+
+.toolbar button#submit:hover {
+  background: #73d13d;
+}
+
+/* 故事输入框样式 */
+.storyBox {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.storyBox input {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) inset;
+  font-size: 0.9rem;
+}
+
+.storyBox input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.5);
+}
+
+/* 海洋区域样式 */
+#ocean {
+  background: url(../assets/sea.png) center/cover no-repeat;
+  position: relative;
+  z-index: 1;
+}
+
+#ocean canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  background: transparent;
+}
+
+#back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255,255,255,0.8);
+  color: #333;
+  padding: 0.6rem 1.2rem;
+  z-index: 100;
+}
+
+#back:hover {
+  background: white;
+}
+
+/* 动画效果 */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  #home h1 {
+    font-size: 2rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  #canvas {
+    width: 90vw;
+    height: auto;
+  }
+  
+  .toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .storyBox {
+    flex-direction: column;
+  }
+}
+
+/* 小鱼管理面板样式 */
+.fish-manage-btn {
+  position: absolute !important;
+  top: 70px !important; /* 放在贝壳数量下方 */
+  right: 20px !important;
+  z-index: 9999 !important;
+  background: #ff7a45 !important;
+  color: white !important;
+  padding: 0.6rem 1.2rem !important;
+  border-radius: 8px !important;
+}
+
+.fish-list-panel {
+  position: absolute !important;
+  top: 120px !important; /* 调整面板位置，避免重叠 */
+  right: 20px !important;
+  width: 320px !important;
+  max-height: 60vh !important; /* 调整最大高度 */
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+  padding: 20px !important;
+  overflow-y: auto !important;
+  transform: translateX(350px) !important;
+  transition: transform 0.3s ease-out !important;
+  z-index: 9998 !important;
+  display: block !important;
+}
+
+.fish-list-panel.show {
+  transform: translateX(0) !important;
+}
+
+.fish-list-panel h3 {
+  color: #333;
+  margin: 0 0 15px 0 !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.fish-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px !important;
+  background: #f8f9fa !important;
+  border-radius: 8px !important;
+  margin-bottom: 10px !important;
+}
+
+.fish-item .name {
+  font-weight: bold !important;
+  color: #2c3e50 !important;
+  margin-bottom: 4px !important;
+  font-size: 14px !important;
+}
+
+.fish-item .story {
+  font-size: 12px !important;
+  color: #666 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.fish-item .delete-btn {
+  background: #ff4d4f !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+}
+
+.fish-item .delete-btn:hover {
+  background: #f5222d !important;
+}
+
+.fish-items p {
+  text-align: center !important;
+  color: #999 !important;
+  padding: 20px 0 !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+/* 商店样式 */
+#store {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.store-container {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.store-container h2 {
+  text-align: center;
+  color: #2d3436;
+  margin-bottom: 1.5rem;
+  font-size: 2.2rem;
+}
+
+#store .shell-count {
+  position: static;
+  background: #ffeaa7;
+  color: #d63031;
+  margin: 0 auto 1.5rem;
+  display: inline-block;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.store-categories {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.category-btn {
+  background: #dfe6e9;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #636e72;
+}
+
+.category-btn.active {
+  background: #0984e3;
+  color: white;
+  box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
+}
+
+.category-btn:hover:not(.active) {
+  background: #b2bec3;
+}
+
+.items-category {
+  display: none;
+}
+
+.items-category.active {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.store-item {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.store-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border-color: #74b9ff;
+}
+
+.item-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #74b9ff;
+}
+
+/* 商品图片样式 */
+.item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.store-item:hover .item-img {
+  transform: scale(1.1);
+}
+
+.item-info {
+  text-align: center;
+  flex-grow: 1;
+}
+
+.item-info h3 {
+  color: #2d3436;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.item-info p {
+  color: #636e72;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.item-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #e17055;
+  background: #ffeaa7;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.buy-btn {
+  background: #00b894;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 150px;
+}
+
+.buy-btn:hover:not(:disabled) {
+  background: #00a085;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.buy-btn:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.buy-btn.owned {
+  background: #636e72;
+}
+
+.back-btn {
+  background: #6c5ce7;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.back-btn:hover {
+  background: #5649c0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .store-container {
+    padding: 1.5rem;
+  }
+  
+  .items-category.active {
+    grid-template-columns: 1fr;
+  }
+  
+  .store-item {
+    padding: 1rem;
+  }
+  
+  .item-image {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* 购买动画 */
+@keyframes purchasePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 184, 148, 0.5); }
+  100% { transform: scale(1); }
+}
+
+/* 商店角色标识 */
+.store-badge {
+  background: #ff6b35;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* 装饰物品标识 */
+.decor-badge {
+  background: #52c41a;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* 装饰物品拖动时的样式 */
+.decor-dragging {
+  cursor: grabbing !important;
+  opacity: 0.8;
+}
