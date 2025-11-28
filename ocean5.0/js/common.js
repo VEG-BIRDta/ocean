@@ -126,3 +126,14 @@ document.addEventListener('DOMContentLoaded', function() {
      // 初始化喂食按钮状态
   updateFeedBtnStatus();
   }); 
+
+  // 在 common.js 中添加画板商店按钮事件
+document.addEventListener('DOMContentLoaded', function() {
+  const toStoreBtnDraw = document.getElementById('toStoreBtnDraw');
+  if (toStoreBtnDraw) {
+    toStoreBtnDraw.addEventListener('click', function() {
+      goTo('store');
+      updateShellDisplay();
+    });
+  }
+});

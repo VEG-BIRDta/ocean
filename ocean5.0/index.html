@@ -25,11 +25,11 @@
     <h2>画一条你的小鱼</h2>
     <!-- 贝壳数量显示 -->
     <div class="shell-count">贝壳数量: <span id="shellCountDraw">0</span></div>
+
+    <!-- 新增：画板界面的商店按钮，与海洋界面一致 -->
+    <button id="toStoreBtnDraw" class="btn store-btn-draw">前往商店</button>
+
     <canvas id="canvas" width="400" height="400"></canvas>
-
-  <!-- 商店 -->
-  <button id="toStoreBtnSea" class="btn" style="top: 20px; right: 150px; background-color: #9b59b6;">前往商店</button>
-
 
     <div class="toolbar">
       <input type="color" id="color" value="#409eff">
@@ -131,7 +131,7 @@
             </div>
             <div class="item-info">
               <h3>礁石</h3>
-              <p>一块沉默的礁石</p>
+              <p>一块沉默的礁石...</p>
               <div class="item-price">30 贝壳</div>
             </div>
             <button class="buy-btn">购买</button>

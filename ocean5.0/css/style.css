@@ -892,3 +892,60 @@ body, html {
   min-width: 20px;
   text-align: center;
 }
+
+/* 画板界面商店按钮样式 */
+.store-btn-draw {
+  position: absolute !important;
+  top: 20px !important;
+  right: 150px !important; /* 与贝壳数量错开 */
+  background-color: #9b59b6 !important;
+  color: white !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  border: 2px solid #ffffff !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.store-btn-draw:hover {
+  background-color: #8e44ad !important;
+  transform: scale(1.05) !important;
+}
+
+/* 确保画板界面的贝壳数量位置正确 */
+#draw .shell-count {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #ff6b35;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+/* 调整画板标题位置，为按钮留出空间 */
+#draw h2 {
+  margin-top: 60px; /* 为顶部按钮留出空间 */
+  color: #333;
+  font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+}
+
+/* 确保画布位置正确 */
+#canvas {
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: white;
+  cursor: crosshair;
+}

@@ -70,7 +70,3 @@ document.getElementById('goToSea').onclick = () => {
   goTo('sea');
 };
 
-/* ====== 商店按钮 ====== */
-document.getElementById('goToStore').onclick = () => {
-  goTo('store');
-};

@@ -125,13 +125,13 @@ function getCharacterData(itemId) {
         'spongebob': {
             imgSrc: 'assets/spongebob.png',
             name: '海绵宝宝',
-            story: '快乐的海绵宝宝，永远乐观！',
+            story: '我准备好了！我准备好了！',
             size: 100
         },
         'patrick': {
             imgSrc: 'assets/patrick.png',
             name: '派大星',
-            story: '海绵宝宝的好朋友，有点呆萌',
+            story: '海绵宝宝我们去抓水母吧',
             size: 110
         }
     };
@@ -144,13 +144,13 @@ function getDecorData(itemId) {
         'seaweed': {
             imgSrc: 'assets/seaweed.png',
             name: '海草',
-            story: '随波摇曳的绿色海草',
+            story: '像一颗海草海草',
             size: 80
         },
         'reef': {
             imgSrc: 'assets/reef.png',
             name: '礁石',
-            story: '色彩斑斓的珊瑚礁',
+            story: '一块沉默的礁石...',
             size: 120
         },
         'coral': {
@@ -292,6 +292,7 @@ function getItemName(itemId) {
 
 // 商店界面初始化
 function initStore() {
+    updatePurchasedItemsDescription();
     // 分类切换
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -333,6 +334,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// 更新已购买商品的描述
+function updatePurchasedItemsDescription() {
+    // 更新已购买的小鱼描述
+    fishes.forEach(fish => {
+        if (typeof fish.id === 'string' && fish.id.startsWith('store_')) {
+            const itemId = fish.id.replace('store_', '').split('_')[0]; // 获取基础ID
+            const characterData = getCharacterData(itemId);
+            if (characterData) {
+                fish.story = characterData.story;
+            }
+        }
+    });
+    
+    // 更新已购买的装饰物品描述
+    decors.forEach(decor => {
+        if (decor.baseId) {
+            const decorData = getDecorData(decor.baseId);
+            if (decorData) {
+                decor.story = decorData.story;
+            }
+        }
+    });
+    
+    // 保存更新后的数据
+    saveFishes();
+    saveDecors();
+}
+
+
 
 // 初始化商店
 loadOwnedItems();
