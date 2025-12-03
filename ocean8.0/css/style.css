@@ -1,0 +1,1368 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body, html {
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a91ff 0%, #0052cc 100%);
+}
+
+/* 白色方框容器 */
+.image-frame {
+  width: 90%;
+  max-width: 800px;
+  height: 500px;
+  margin: 2rem auto;
+  padding: 10px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.frame-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* 按钮组样式 */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* 贝壳数量显示样式 */
+.shell-count {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #ff6b35;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+/* 海洋界面的贝壳数量显示 - 放在上方 */
+#sea .shell-count {
+  top: 20px;
+  right: 20px;
+}
+
+/* 泡泡样式 */
+.bubble {
+  position: absolute;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.2s ease;
+  pointer-events: auto;
+}
+
+.bubble:hover {
+  transform: scale(1.1);
+}
+
+.bubble.popped {
+  animation: pop 0.3s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* 贝壳获得的动画 */
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-30px) scale(1.2);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-60px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.shell-gain-animation {
+  animation: floatUp 1.5s ease-out forwards;
+  font-family: 'Arial', sans-serif;
+  color: #8b5cf6 !important;
+  font-weight: bold;
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4);
+  z-index: 1000 !important;
+}
+
+/* 页面过渡动画 */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 1;
+}
+
+.screen.hidden {
+  display: none !important;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* 小鱼气泡样式 */
+.fish-bubble {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 10px 15px;
+  min-width: 150px;
+  max-width: 250px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  pointer-events: none;
+  z-index: 10;
+  transition: 
+    opacity 0.3s ease-out, 
+    left 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+    top 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: bubbleFloat 3s ease-in-out infinite;
+}
+
+@keyframes bubbleFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+.fish-bubble::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+}
+.fish-bubble.left::after {
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: rgba(255, 255, 255, 0.9);
+}
+.fish-bubble.right::after {
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: rgba(255, 255, 255, 0.9);
+}
+
+.fish-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 3px;
+}
+
+.fish-story {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* 首页样式 */
+#home {
+  background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+  gap: 2rem;
+  padding: 2rem;
+}
+
+#home h1 {
+  font-size: 3rem;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* 按钮样式 */
+.btn {
+  background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.5);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* 画板样式 */
+#draw {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+#draw h2 {
+  color: #333;
+  font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+  margin-top: 60px; /* 为顶部按钮留出空间 */
+}
+
+#canvas {
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background: white;
+  cursor: crosshair;
+}
+
+/* 工具栏样式 */
+.toolbar {
+  margin-top: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: rgba(255,255,255,0.8);
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.toolbar input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 3px;
+  background: transparent;
+}
+
+.toolbar input[type="range"] {
+  width: 100px;
+}
+
+.toolbar button {
+  background: #409eff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar button:hover {
+  background: #66b1ff;
+}
+
+.toolbar button#submit {
+  background: #52c41a;
+}
+
+.toolbar button#submit:hover {
+  background: #73d13d;
+}
+
+/* 故事输入框样式 */
+.storyBox {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.storyBox input {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) inset;
+  font-size: 0.9rem;
+}
+
+.storyBox input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.5);
+}
+
+/* 海洋区域样式 */
+#ocean {
+  background: url(../assets/sea.png) center/cover no-repeat;
+  position: relative;
+  z-index: 1;
+}
+
+#ocean canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  background: transparent;
+}
+
+#back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255,255,255,0.8);
+  color: #333;
+  padding: 0.6rem 1.2rem;
+  z-index: 100;
+}
+
+#back:hover {
+  background: white;
+}
+
+/* 动画效果 */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  #home h1 {
+    font-size: 2rem;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  #canvas {
+    width: 90vw;
+    height: auto;
+  }
+  
+  .toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .storyBox {
+    flex-direction: column;
+  }
+}
+
+/* 小鱼管理面板样式 */
+.fish-manage-btn {
+  position: absolute !important;
+  top: 120px !important; /* 放在贝壳数量下方 */
+  left: 20px !important;
+  z-index: 9999 !important;
+  background: #ff7a45 !important;
+  color: white !important;
+  padding: 0.6rem 1.2rem !important;
+  border-radius: 8px !important;
+}
+
+.fish-list-panel {
+  position: absolute !important;
+  top: 120px !important; /* 调整面板位置，避免重叠 */
+  right: 20px !important;
+  width: 320px !important;
+  max-height: 60vh !important; /* 调整最大高度 */
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2) !important;
+  padding: 20px !important;
+  overflow-y: auto !important;
+  transform: translateX(350px) !important;
+  transition: transform 0.3s ease-out !important;
+  z-index: 9998 !important;
+  display: block !important;
+}
+
+.fish-list-panel.show {
+  transform: translateX(0) !important;
+}
+
+.fish-list-panel h3 {
+  color: #333;
+  margin: 0 0 15px 0 !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.fish-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px !important;
+  background: #f8f9fa !important;
+  border-radius: 8px !important;
+  margin-bottom: 10px !important;
+}
+
+.fish-item .name {
+  font-weight: bold !important;
+  color: #2c3e50 !important;
+  margin-bottom: 4px !important;
+  font-size: 14px !important;
+}
+
+.fish-item .story {
+  font-size: 12px !important;
+  color: #666 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.fish-item .delete-btn {
+  background: #ff4d4f !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+}
+
+.fish-item .delete-btn:hover {
+  background: #f5222d !important;
+}
+
+.fish-items p {
+  text-align: center !important;
+  color: #999 !important;
+  padding: 20px 0 !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+/* 商店样式 */
+#store {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.store-container {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.store-container h2 {
+  text-align: center;
+  color: #2d3436;
+  margin-bottom: 1.5rem;
+  font-size: 2.2rem;
+}
+
+#store .shell-count {
+  position: static;
+  background: #ffeaa7;
+  color: #d63031;
+  margin: 0 auto 1.5rem;
+  display: inline-block;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+.store-categories {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.category-btn {
+  background: #dfe6e9;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #636e72;
+}
+
+.category-btn.active {
+  background: #0984e3;
+  color: white;
+  box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
+}
+
+.category-btn:hover:not(.active) {
+  background: #b2bec3;
+}
+
+.items-category {
+  display: none;
+}
+
+.items-category.active {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.store-item {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.store-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border-color: #74b9ff;
+}
+
+/* 商店商品图片容器样式 - 解决透明底和尺寸问题 */
+.item-image {
+  width: 150px; /* 增大尺寸（原120px） */
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: transparent; /* 移除浅灰色背景，显示透明底 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #74b9ff;
+}
+
+/* 响应式调整（小屏幕下） */
+@media (max-width: 768px) {
+  .item-image {
+    width: 130px; /* 小屏幕下也增大尺寸（原100px） */
+    height: 130px;
+  }
+}
+
+/* 商品图片自适应容器 */
+.item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 保持图片比例，避免拉伸 */
+}
+
+.store-item:hover .item-img {
+  transform: scale(1.1);
+}
+
+.item-info {
+  text-align: center;
+  flex-grow: 1;
+}
+
+.item-info h3 {
+  color: #2d3436;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.item-info p {
+  color: #636e72;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.item-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #e17055;
+  background: #ffeaa7;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.buy-btn {
+  background: #00b894;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 150px;
+}
+
+.buy-btn:hover:not(:disabled) {
+  background: #00a085;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.buy-btn:disabled {
+  background: #b2bec3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.buy-btn.owned {
+  background: #636e72;
+}
+
+.back-btn {
+  background: #6c5ce7;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.back-btn:hover {
+  background: #5649c0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .store-container {
+    padding: 1.5rem;
+  }
+  
+  .items-category.active {
+    grid-template-columns: 1fr;
+  }
+  
+  .store-item {
+    padding: 1rem;
+  }
+  
+  .item-image {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* 购买动画 */
+@keyframes purchasePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 184, 148, 0.5); }
+  100% { transform: scale(1); }
+}
+
+/* 商店角色标识 */
+.store-badge {
+  background: #ff6b35;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* 装饰物品标识 */
+.decor-badge {
+  background: #52c41a;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* 装饰物品拖动时的样式 */
+.decor-dragging {
+  cursor: grabbing !important;
+  opacity: 0.8;
+}
+
+/* 鱼食样式 */
+.fish-food {
+  position: absolute;
+  width: 16px !important; /* 强制20px，避免被其他样式覆盖 */
+  height: 16px !important;
+  background-color: #FF8C00 !important; /* 改为橙色，比棕色更醒目 */
+  border-radius: 50% !important;
+  z-index: 999 !important; /* 层级拉满，高于所有元素 */
+  pointer-events: none;
+  border: 2px solid #FF8C00 !important; /* 白色粗边框，绝对不会和背景融合 */
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.8) !important; /* 橙色发光效果，远距离可见 */
+}
+
+/* 同时确保海洋画布层级低于鱼食 */
+#ocean {
+  z-index: 1 !important;
+}
+
+/* 所有功能按钮层级低于鱼食（但不影响点击） */
+.btn {
+  z-index: 100 !important;
+}
+
+/* 喂食按钮样式 */
+#feedBtn {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  background: #f0940b;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  z-index: 100;
+}
+
+#feedBtn:hover {
+  background-color: #d35400; /*  hover 深色 */
+}
+
+#feedButton:disabled {
+  background: #94a89c;
+  cursor: not-allowed;
+}
+
+#foodCount {
+  position: absolute;
+  top: 170px;
+  left: 20px;
+  background: rgba(255,255,255,0.8);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  z-index: 100;
+}
+
+/* 鱼食效果动画 */
+.food-effect {
+  pointer-events: none;
+}
+
+/* 成长效果动画 */
+.growth-effect, .max-size-effect {
+  pointer-events: none;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+#showFishes, #clearDataBtn, #feedBtn {
+  width: 120px; /* 统一宽度 */
+  text-align: center;
+  padding: 10px 0; /* 上下内边距，左右0 */
+  left: 20px;
+  position: absolute;
+}
+
+/* 海洋界面商店按钮：使用图片作为按钮，无背景 */
+#toStoreBtnSea {
+  position: absolute !important;
+  top: 20px !important;
+  right: 150px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+#toStoreBtnSea img {
+  width: 70px !important;
+  height: 70px !important;
+  object-fit: contain !important;
+}
+
+#toStoreBtnSea:hover {
+  background-color: transparent !important; /* 确保hover时无背景 */
+  transform: scale(1.1) !important; /* 放大效果增强交互 */
+}
+
+/* 小鱼操作按钮容器 */
+.fish-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 隐藏/显示按钮样式 */
+.toggle-visibility-btn {
+  background: #3498db !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  white-space: nowrap;
+}
+
+.toggle-visibility-btn:hover {
+  background: #2980b9 !important;
+}
+
+/* 装饰物品分组样式 */
+.decor-group-item {
+  border-left: 4px solid #52c41a !important;
+}
+
+.decor-count {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.decor-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.decor-controls button {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.decor-controls button:hover {
+  background: #2980b9;
+}
+
+.decor-controls button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.decor-count-display {
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* 画板界面商店按钮样式：使用图片作为按钮，无背景 */
+.store-btn-draw {
+  position: absolute !important;
+  top: 20px !important;
+  right: 150px !important;
+  background: transparent !important; /* 新增：完全清除背景（包括渐变） */
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  z-index: 9999 !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+/* 新增：设置store.png图标尺寸 */
+.store-btn-draw img {
+  width: 70px !important;  /* 原来可能是40px/50px，改大即可，比如80px */
+  height: 70px !important; /* 和width保持一致，避免图标变形 */
+  object-fit: contain !important; /* 确保图标完整显示，不裁剪 */
+}
+
+/* 商店按钮图标样式 */
+.store-icon {
+  width: 40px; /* 调整图标大小 */
+  height: 40px;
+  vertical-align: middle;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.store-btn-draw:hover {
+  background-color: transparent !important; /* 确保hover时无背景 */
+  transform: scale(1.1) !important; /* 放大效果增强交互 */
+}
+
+/* 确保画板界面的贝壳数量位置正确 */
+#draw .shell-count {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* 海洋界面商店按钮：使用图片作为按钮，无背景 */
+.store-btn-sea {
+  position: absolute !important;
+  top: 20px !important;
+  right: 150px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  z-index: 9999 !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.store-btn-sea img {
+  width: 70px !important;  /* 自定义尺寸，比如80px、100px */
+  height: 70px !important;
+  object-fit: contain !important;
+}
+
+.store-btn-sea:hover {
+  background-color: transparent !important; /* 确保hover时无背景 */
+  transform: scale(1.1) !important; /* 放大效果增强交互 */
+}
+
+/* ... 原有样式保持不变 ... */
+
+/* ========== 海绵宝宝冒险场景样式 ========== */
+#spongebobAdventure {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.adventure-container {
+  width: 90%;
+  max-width: 900px;
+  height: 85vh;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.adventure-scene {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.adventure-background {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* 修改：海绵宝宝放在对话框左边 */
+.character-spongebob {
+  position: absolute;
+  left: 150px;
+  bottom: 120px; /* 稍微向上移动，给对话框留空间 */
+  z-index: 10;
+  animation: bounce 2s infinite ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 修改：用户小鱼放在对话框右边 */
+.character-user-fish {
+  position: absolute;
+  right: 150px;
+  bottom: 120px; /* 与海绵宝宝对称 */
+  z-index: 10;
+  animation: bounce 2s infinite ease-in-out 0.5s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.adventure-character {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+}
+
+/* 添加角色名字标签 */
+.character-name {
+  margin-top: 10px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  white-space: nowrap;
+}
+
+/* 修改对话框容器位置 - 放在两个角色中间 */
+.dialogue-container {
+  position: absolute;
+  bottom: 200px; /* 向上移动，给角色留空间 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  z-index: 20;
+}
+
+.dialogue-box {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  border: 3px solid #ffd700;
+  position: relative;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.dialogue-box::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+}
+
+.spongebob-dialogue {
+  border-color: #ffd700;
+  margin-right: auto; /* 左对齐 */
+  margin-left: 0;
+  max-width: 450px; /* 限制宽度 */
+}
+
+.spongebob-dialogue::before {
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: #ffd700;
+}
+
+.userfish-dialogue {
+  border-color: #74b9ff;
+  margin-left: auto; /* 右对齐 */
+  margin-right: 0;
+  max-width: 450px; /* 限制宽度 */
+  text-align: right;
+}
+
+.userfish-dialogue::before {
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: #74b9ff;
+}
+
+.dialogue-box .speaker {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+  text-align: left;
+}
+
+.userfish-dialogue .speaker {
+  text-align: right; /* 用户对话的名字右对齐 */
+}
+
+.dialogue-box .message {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.userfish-dialogue .message {
+  text-align: right; /* 用户对话的内容右对齐 */
+}
+
+.adventure-controls {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  width: 100%;
+}
+
+.adventure-btn {
+  background: #00b894;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.adventure-btn:hover {
+  background: #00a085;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 184, 148, 0.4);
+}
+
+.skip-btn {
+  background: #e17055;
+}
+
+.skip-btn:hover {
+  background: #d65c40;
+}
+
+/* 动画效果 */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .adventure-container {
+    width: 95%;
+    height: 90vh;
+  }
+  
+  .character-spongebob {
+    left: 40px;
+    bottom: 100px;
+  }
+  
+  .character-user-fish {
+    right: 40px;
+    bottom: 100px;
+  }
+  
+  .adventure-character {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .character-name {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .dialogue-container {
+    width: 85%;
+    bottom: 180px;
+  }
+  
+  .spongebob-dialogue,
+  .userfish-dialogue {
+    max-width: 320px;
+  }
+  
+  .adventure-controls {
+    bottom: 20px;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .adventure-btn {
+    min-width: 160px;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .character-spongebob {
+    left: 20px;
+    bottom: 90px;
+  }
+  
+  .character-user-fish {
+    right: 20px;
+    bottom: 90px;
+  }
+  
+  .adventure-character {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .dialogue-container {
+    bottom: 160px;
+    width: 90%;
+  }
+  
+  .spongebob-dialogue,
+  .userfish-dialogue {
+    max-width: 280px;
+    padding: 15px;
+  }
+  
+  .dialogue-box .speaker {
+    font-size: 1rem;
+  }
+  
+  .dialogue-box .message {
+    font-size: 0.9rem;
+  }
+}
+
+/* 在 style.css 中添加解锁提示样式 */
+.unlock-hint {
+    color: #e74c3c !important;
+    font-size: 12px !important;
+    margin-top: 5px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+/* 修改商店项目样式，给提示信息留空间 */
+.store-item {
+    min-height: 320px; /* 增加高度容纳提示信息 */
+    position: relative;
+}
+
+/* 已拥有物品的特殊样式 */
+.store-item.owned-item {
+    opacity: 0.8;
+    border-color: #7f8c8d !important;
+}
+
+.store-item.owned-item:hover {
+    transform: none !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1) !important;
+    cursor: default !important;
+}
+
+/* 未解锁物品的特殊样式 */
+.store-item.locked-item {
+    opacity: 0.6;
+    filter: grayscale(0.3);
+    border-color: #bdc3c7 !important;
+}
+
+.store-item.locked-item:hover {
+    transform: none !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1) !important;
+    cursor: not-allowed !important;
+}
+
+/* 更新进度条样式，显示更多角色 */
+.purchase-progress {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 15px 20px;
+    margin: 0 auto 25px;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 2px solid #74b9ff;
+}
+
+.progress-text {
+    text-align: center;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 16px;
+    background: #dfe6e9;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #b2bec3;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.5s ease, background 0.5s ease;
+}
+
+/* 调整商店项目布局，适应更多角色 */
+.items-category.active {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+    max-height: 65vh;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* 调整商店容器高度 */
+.store-container {
+    max-height: 85vh;
+}
+
+/* 进度条文本调整 */
+.progress-text {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+/* 角色分类增加滚动条 */
+.items-category.characters.active {
+    max-height: 60vh;
+}
