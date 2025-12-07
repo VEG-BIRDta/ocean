@@ -1,118 +1,425 @@
-<!-- 1. 海底四乐章冒险（泡泡→阿酷→小美美→双面龟） -->
-<div class="ocean-dialog-system" style="padding: 16px; max-width: 800px; margin: 0 auto; margin-top: 30px;">
-  <h2 style="color: #2e8b57; margin-bottom: 16px;">海底四乐章冒险</h2>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>互动式电子海洋 - 交互系统</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* 基础样式 */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    /* Section 样式 */
+    .screen {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 900px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .screen.hidden {
+      display: none;
+    }
+
+    /* 标题样式 */
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(45deg, #3498db, #9b59b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h2 {
+      font-size: 2em;
+      color: #34495e;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin: 10px;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+      background: linear-gradient(45deg, #2980b9, #3498db);
+    }
+
+    /* 按钮组样式 */
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    /* NPC 列表样式 */
+    .npc-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .npc-item {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .npc-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .npc-item h3 {
+      margin: 0 0 15px 0;
+      color: #2c3e50;
+      font-size: 1.3em;
+    }
+
+    /* 对话容器样式 */
+    .ocean-dialog-container,
+    .bikini-dialog-container,
+    .rescue-dialog-container {
+      display: none;
+      margin-top: 30px;
+      padding: 25px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+      border: 2px solid;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .ocean-dialog-container {
+      border-color: #2e8b57;
+      background: linear-gradient(135deg, rgba(240, 255, 248, 0.9), rgba(255, 255, 255, 0.9));
+    }
+
+    .bikini-dialog-container {
+      border-color: #ffd700;
+      background: linear-gradient(135deg, rgba(255, 248, 230, 0.9), rgba(255, 255, 255, 0.9));
+    }
+
+    .rescue-dialog-container {
+      border-color: #1e90ff;
+      background: linear-gradient(135deg, rgba(230, 247, 255, 0.9), rgba(255, 255, 255, 0.9));
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ocean-dialog-speaker,
+    .bikini-dialog-speaker,
+    .rescue-dialog-speaker {
+      font-weight: bold;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .ocean-dialog-speaker {
+      color: #2e8b57;
+      border-left: 4px solid #2e8b57;
+    }
+
+    .bikini-dialog-speaker {
+      color: #ff8c00;
+      border-left: 4px solid #ff8c00;
+    }
+
+    .rescue-dialog-speaker {
+      color: #0066cc;
+      border-left: 4px solid #0066cc;
+    }
+
+    .ocean-dialog-content,
+    .bikini-dialog-content,
+    .rescue-dialog-content {
+      line-height: 1.8;
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 8px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .ocean-dialog-choices,
+    .bikini-dialog-choices,
+    .rescue-dialog-choices {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* 特殊系统按钮颜色 */
+    .ocean-dialog-choices .btn {
+      background: linear-gradient(45deg, #2e8b57, #27ae60);
+    }
+
+    .ocean-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #27ae60, #2e8b57);
+    }
+
+    .bikini-dialog-choices .btn {
+      background: linear-gradient(45deg, #ff8c00, #ff9500);
+    }
+
+    .bikini-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #ff9500, #ff8c00);
+    }
+
+    .rescue-dialog-choices .btn {
+      background: linear-gradient(45deg, #0066cc, #0077dd);
+    }
+
+    .rescue-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #0077dd, #0066cc);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .screen {
+        margin: 10px;
+        padding: 20px;
+      }
+      
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .npc-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .ocean-dialog-choices,
+      .bikini-dialog-choices,
+      .rescue-dialog-choices {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ① 交互首页 -->
+<section id="interactionHome" class="screen">
+  <h1>海底冒险交互系统</h1>
+  <div class="image-frame">
+    <img src="assets/home-image.png" alt="海洋场景" class="frame-image">
+  </div>
+  <div class="button-group">
+    <button id="goToOceanAdventure" class="btn">海底四乐章冒险</button>
+    <button id="goToBikiniStory" class="btn">比奇堡故事线</button>
+    <button id="goToRescueAdventure" class="btn">拯救洋流大冒险</button>
+  </div>
+</section>
+
+<!-- ② 海底四乐章冒险 -->
+<section id="oceanAdventure" class="screen hidden">
+  <h2>海底四乐章冒险</h2>
+  <button id="backToInteractionHome" class="btn">← 返回首页</button>
+  
   <!-- NPC列表 -->
-  <div class="npc-list" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-    <div class="npc-item" id="npc-bubble" style="padding: 12px; border: 1px solid #2e8b57; border-radius: 8px; background: #f0fff8;">
-      <h3 style="margin: 0; color: #2e8b57;">泡泡（海底沙地）</h3>
-      <button class="talk-btn" data-npc="bubble" data-system="ocean" style="background: #2e8b57; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px; transition: background 0.2s;">开始对话</button>
+  <div class="npc-list">
+    <div class="npc-item" id="npc-bubble">
+      <h3>泡泡（海底沙地）</h3>
+      <button class="talk-btn" data-npc="bubble" data-system="ocean">开始对话</button>
     </div>
-    <div class="npc-item" id="npc-aku" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">阿酷（沉船峡谷）</h3>
-      <button class="talk-btn" data-npc="aku" data-system="ocean" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-aku" style="opacity: 0.5;">
+      <h3>阿酷（沉船峡谷）</h3>
+      <button class="talk-btn" data-npc="aku" data-system="ocean" disabled>未解锁</button>
     </div>
-    <div class="npc-item" id="npc-meimei" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">小美美（海藻森林）</h3>
-      <button class="talk-btn" data-npc="meimei" data-system="ocean" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-meimei" style="opacity: 0.5;">
+      <h3>小美美（海藻森林）</h3>
+      <button class="talk-btn" data-npc="meimei" data-system="ocean" disabled>未解锁</button>
     </div>
-    <div class="npc-item" id="npc-tortoise" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">双面龟（珊瑚迷宫）</h3>
-      <button class="talk-btn" data-npc="tortoise" data-system="ocean" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-tortoise" style="opacity: 0.5;">
+      <h3>双面龟（珊瑚迷宫）</h3>
+      <button class="talk-btn" data-npc="tortoise" data-system="ocean" disabled>未解锁</button>
     </div>
   </div>
 
-  <!-- 对话展示区域（专属类名） -->
-  <div class="ocean-dialog-container" style="display: none; border: 1px solid #2e8b57; border-radius: 8px; padding: 16px; background: #fff; min-height: 200px;">
-    <div class="ocean-dialog-speaker" style="font-weight: 600; color: #2e8b57; font-size: 18px; margin-bottom: 12px;"></div>
-    <div class="ocean-dialog-content" style="margin-bottom: 20px; line-height: 1.6; font-size: 16px;"></div>
-    <div class="ocean-dialog-choices" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+  <!-- 对话展示区域 -->
+  <div class="ocean-dialog-container">
+    <div class="ocean-dialog-speaker"></div>
+    <div class="ocean-dialog-content"></div>
+    <div class="ocean-dialog-choices"></div>
   </div>
-</div>
+</section>
 
-<!-- 2. 比奇堡故事线（海绵宝宝→派大星→章鱼哥→蟹老板） -->
-<div class="bikini-dialog-system" style="padding: 16px; max-width: 800px; margin: 0 auto; margin-top: 30px;">
-  <h2 style="color: #ff8c00; margin-bottom: 16px;">比奇堡故事线</h2>
+<!-- ③ 比奇堡故事线 -->
+<section id="bikiniStory" class="screen hidden">
+  <h2>比奇堡故事线</h2>
+  <button id="backToInteractionHome2" class="btn">← 返回首页</button>
+  
   <!-- NPC列表 -->
-  <div class="npc-list" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-    <div class="npc-item" id="npc-spongebob" style="padding: 12px; border: 1px solid #ffd700; border-radius: 8px; background: #fff8e6;">
-      <h3 style="margin: 0; color: #ff8c00;">海绵宝宝（沙滩）</h3>
-      <button class="talk-btn" data-npc="spongebob" data-system="bikini" style="background: #ff8c00; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px; transition: background 0.2s;">开始对话</button>
+  <div class="npc-list">
+    <div class="npc-item" id="npc-spongebob">
+      <h3>海绵宝宝（沙滩）</h3>
+      <button class="talk-btn" data-npc="spongebob" data-system="bikini">开始对话</button>
     </div>
-    <div class="npc-item" id="npc-patrick" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">派大星（石头下）</h3>
-      <button class="talk-btn" data-npc="patrick" data-system="bikini" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-patrick" style="opacity: 0.5;">
+      <h3>派大星（石头下）</h3>
+      <button class="talk-btn" data-npc="patrick" data-system="bikini" disabled>未解锁</button>
     </div>
-    <div class="npc-item" id="npc-squidward" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">章鱼哥（艺术小屋）</h3>
-      <button class="talk-btn" data-npc="squidward" data-system="bikini" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-squidward" style="opacity: 0.5;">
+      <h3>章鱼哥（艺术小屋）</h3>
+      <button class="talk-btn" data-npc="squidward" data-system="bikini" disabled>未解锁</button>
     </div>
-    <div class="npc-item" id="npc-mr-crab" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">蟹老板（蟹堡王办公室）</h3>
-      <button class="talk-btn" data-npc="mr-crab" data-system="bikini" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-mr-crab" style="opacity: 0.5;">
+      <h3>蟹老板（蟹堡王办公室）</h3>
+      <button class="talk-btn" data-npc="mr-crab" data-system="bikini" disabled>未解锁</button>
     </div>
   </div>
 
-  <!-- 对话展示区域（专属类名） -->
-  <div class="bikini-dialog-container" style="display: none; border: 1px solid #ffd700; border-radius: 8px; padding: 16px; background: #fff; min-height: 200px;">
-    <div class="bikini-dialog-speaker" style="font-weight: 600; color: #ff8c00; font-size: 18px; margin-bottom: 12px;"></div>
-    <div class="bikini-dialog-content" style="margin-bottom: 20px; line-height: 1.6; font-size: 16px;"></div>
-    <div class="bikini-dialog-choices" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+  <!-- 对话展示区域 -->
+  <div class="bikini-dialog-container">
+    <div class="bikini-dialog-speaker"></div>
+    <div class="bikini-dialog-content"></div>
+    <div class="bikini-dialog-choices"></div>
   </div>
-</div>
+</section>
 
-<!-- 3. 拯救洋流大冒险（尼莫→多莉→马琳→布鲁斯） -->
-<div class="rescue-dialog-system" style="padding: 16px; max-width: 800px; margin: 0 auto; margin-top: 30px;">
-  <h2 style="color: #0066cc; margin-bottom: 16px;">拯救洋流大冒险</h2>
+<!-- ④ 拯救洋流大冒险 -->
+<section id="rescueAdventure" class="screen hidden">
+  <h2>拯救洋流大冒险</h2>
+  <button id="backToInteractionHome3" class="btn">← 返回首页</button>
+  
   <!-- NPC列表 -->
-  <div class="npc-list" style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
-    <div class="npc-item" id="npc-nemo" style="padding: 12px; border: 1px solid #1e90ff; border-radius: 8px; background: #e6f7ff;">
-      <h3 style="margin: 0; color: #0066cc;">尼莫（珊瑚礁）</h3>
-      <button class="talk-btn" data-npc="nemo" data-system="rescue" style="background: #0066cc; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px; transition: background 0.2s;">开始对话</button>
+  <div class="npc-list">
+    <div class="npc-item" id="npc-nemo">
+      <h3>尼莫（珊瑚礁）</h3>
+      <button class="talk-btn" data-npc="nemo" data-system="rescue">开始对话</button>
     </div>
-    <div class="npc-item" id="npc-dory" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">多莉（海藻林）</h3>
-      <button class="talk-btn" data-npc="dory" data-system="rescue" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-dory" style="opacity: 0.5;">
+      <h3>多莉（海藻林）</h3>
+      <button class="talk-btn" data-npc="dory" data-system="rescue" disabled>未解锁</button>
     </div>
-    <div class="npc-item" id="npc-marlin" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">马琳（礁石区）</h3>
-      <button class="talk-btn" data-npc="marlin" data-system="rescue" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-marlin" style="opacity: 0.5;">
+      <h3>马琳（礁石区）</h3>
+      <button class="talk-btn" data-npc="marlin" data-system="rescue" disabled>未解锁</button>
     </div>
-    <div class="npc-item" id="npc-bruce" style="padding: 12px; border: 1px solid #ccc; border-radius: 8px; background: #f5f5f5; opacity: 0.5;">
-      <h3 style="margin: 0; color: #666;">布鲁斯（深海洞穴）</h3>
-      <button class="talk-btn" data-npc="bruce" data-system="rescue" style="background: #ccc; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed; margin-top: 8px;" disabled>未解锁</button>
+    <div class="npc-item" id="npc-bruce" style="opacity: 0.5;">
+      <h3>布鲁斯（深海洞穴）</h3>
+      <button class="talk-btn" data-npc="bruce" data-system="rescue" disabled>未解锁</button>
     </div>
   </div>
 
-  <!-- 对话展示区域（专属类名） -->
-  <div class="rescue-dialog-container" style="display: none; border: 1px solid #1e90ff; border-radius: 8px; padding: 16px; background: #fff; min-height: 200px;">
-    <div class="rescue-dialog-speaker" style="font-weight: 600; color: #0066cc; font-size: 18px; margin-bottom: 12px;"></div>
-    <div class="rescue-dialog-content" style="margin-bottom: 20px; line-height: 1.6; font-size: 16px;"></div>
-    <div class="rescue-dialog-choices" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+  <!-- 对话展示区域 -->
+  <div class="rescue-dialog-container">
+    <div class="rescue-dialog-speaker"></div>
+    <div class="rescue-dialog-content"></div>
+    <div class="rescue-dialog-choices"></div>
   </div>
-</div>
+</section>
 
 <script>
-// 等待DOM完全加载后执行所有脚本
 document.addEventListener('DOMContentLoaded', function() {
-  // ====================== 核心修复：模块化封装，避免全局变量冲突 ======================
+  // ====================== 页面切换功能 ======================
+  function showScreen(screenId) {
+    // 隐藏所有屏幕
+    document.querySelectorAll('.screen').forEach(screen => {
+      screen.classList.add('hidden');
+    });
+    
+    // 显示目标屏幕
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+      targetScreen.classList.remove('hidden');
+    }
+  }
+
+  // 绑定首页按钮事件
+  document.getElementById('goToOceanAdventure').addEventListener('click', () => {
+    showScreen('oceanAdventure');
+  });
+  
+  document.getElementById('goToBikiniStory').addEventListener('click', () => {
+    showScreen('bikiniStory');
+  });
+  
+  document.getElementById('goToRescueAdventure').addEventListener('click', () => {
+    showScreen('rescueAdventure');
+  });
+
+  // 绑定返回按钮事件
+  document.getElementById('backToInteractionHome').addEventListener('click', () => {
+    showScreen('interactionHome');
+  });
+  
+  document.getElementById('backToInteractionHome2').addEventListener('click', () => {
+    showScreen('interactionHome');
+  });
+  
+  document.getElementById('backToInteractionHome3').addEventListener('click', () => {
+    showScreen('interactionHome');
+  });
+
+  // ====================== 对话系统 ======================
   const DialogSystem = {
-    // 状态管理：按系统分类存储状态，避免变量污染
+    // 状态管理
     state: {
       ocean: { currentNpc: null, currentIndex: 0 },
       bikini: { currentNpc: null, currentIndex: 0 },
       rescue: { currentNpc: null, currentIndex: 0 }
     },
 
-    // 通用对话启动函数（修复重复渲染、鲁棒性问题）
+    // 通用对话启动函数
     startDialog(systemType, npcId, dialogData, currentIndex) {
-      // 存在性检查（增强版）
       if (!dialogData || !dialogData[npcId]) {
         console.error(`[${systemType}] 找不到该NPC的对话数据:`, npcId);
         return { success: false };
       }
 
-      const dialogSystemEl = document.querySelector(`.${systemType}-dialog-system`);
-      const dialogContainer = dialogSystemEl.querySelector(`.${systemType}-dialog-container`);
+      const sectionEl = document.getElementById(systemType === 'ocean' ? 'oceanAdventure' : systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure');
+      const dialogContainer = sectionEl.querySelector(`.${systemType}-dialog-container`);
       const speakerEl = dialogContainer.querySelector(`.${systemType}-dialog-speaker`);
       const contentEl = dialogContainer.querySelector(`.${systemType}-dialog-content`);
       const choicesEl = dialogContainer.querySelector(`.${systemType}-dialog-choices`);
@@ -123,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return { success: false };
       }
 
-      // 修复：重置容器状态，避免重复渲染
+      // 重置容器状态
       choicesEl.innerHTML = '';
       dialogContainer.style.display = 'block';
 
@@ -131,28 +438,22 @@ document.addEventListener('DOMContentLoaded', function() {
       speakerEl.textContent = currentDialog.speaker;
       contentEl.textContent = currentDialog.content;
 
-      // 生成选项按钮（修复闭包+解锁逻辑+交互反馈）
+      // 生成选项按钮
       currentDialog.choices.forEach((choice) => {
         const choiceBtn = document.createElement('button');
         choiceBtn.textContent = choice.text;
-        // 保持原有样式风格，按系统区分按钮颜色 + 添加hover效果
+        choiceBtn.className = 'btn';
+        
+        // 按系统区分按钮颜色
         const btnColorMap = {
-          ocean: { normal: "#4169e1", hover: "#2c4db8" },
-          bikini: { normal: "#d4af37", hover: "#b8962e" },
-          rescue: { normal: "#1e90ff", hover: "#187bcd" }
+          ocean: { normal: "#2e8b57", hover: "#1e6b3f" },
+          bikini: { normal: "#ff8c00", hover: "#e67a00" },
+          rescue: { normal: "#0066cc", hover: "#0052a3" }
         };
         const colors = btnColorMap[systemType];
-        choiceBtn.style = `
-          background: ${colors.normal}; 
-          color: white; 
-          border: none; 
-          padding: 8px 16px; 
-          border-radius: 4px; 
-          cursor: pointer;
-          transition: background 0.2s;
-        `;
+        choiceBtn.style.background = colors.normal;
         
-        // 修复：添加hover交互反馈
+        // 添加hover效果
         choiceBtn.addEventListener('mouseover', () => {
           choiceBtn.style.background = colors.hover;
         });
@@ -160,13 +461,10 @@ document.addEventListener('DOMContentLoaded', function() {
           choiceBtn.style.background = colors.normal;
         });
       
-        // 修复闭包+解锁逻辑（更简洁的写法）
         choiceBtn.addEventListener('click', () => {
-          // 解锁逻辑：只要选项有unlock，立即执行
           if (choice.unlock) {
             this.unlockNpc(systemType, choice.unlock);
           }
-          // 执行选择逻辑
           this.handleChoice(systemType, choice);
         });
         
@@ -213,33 +511,32 @@ document.addEventListener('DOMContentLoaded', function() {
       };
       const styles = styleMap[systemType];
 
-      // 解锁样式更新（修复h3文字颜色未同步的问题）
+      // 解锁样式更新
       nextNpcItem.style.opacity = '1';
-      nextNpcItem.style.borderColor = styles.borderColor;
+      nextNpcItem.style.border = `1px solid ${styles.borderColor}`;
       nextNpcItem.style.background = styles.background;
-      nextNpcItem.querySelector('h3').style.color = styles.textColor; // 新增：同步标题颜色
+      nextNpcItem.querySelector('h3').style.color = styles.textColor;
       
       nextNpcBtn.textContent = '开始对话';
       nextNpcBtn.style.background = styles.btnBg;
       nextNpcBtn.style.color = 'white';
       nextNpcBtn.disabled = false;
       nextNpcBtn.style.cursor = 'pointer';
-      nextNpcBtn.style.transition = 'background 0.2s'; // 新增：hover过渡
+      nextNpcBtn.style.transition = 'background 0.2s';
       
-      // 滚动到解锁的NPC（优化体验）
+      // 滚动到解锁的NPC
       nextNpcItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return nextNpcBtn;
     },
 
-    // 通用选择处理函数（替代全局函数，避免冲突）
+    // 选择处理函数
     handleChoice(systemType, choice) {
       const state = this.state[systemType];
-      const dialogSystemEl = document.querySelector(`.${systemType}-dialog-system`);
-      const dialogContainer = dialogSystemEl.querySelector(`.${systemType}-dialog-container`);
+      const sectionEl = document.getElementById(systemType === 'ocean' ? 'oceanAdventure' : systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure');
+      const dialogContainer = sectionEl.querySelector(`.${systemType}-dialog-container`);
       
       if (choice.next !== null && choice.next !== undefined) {
         state.currentIndex = choice.next;
-        // 根据系统获取对应对话数据
         const dialogData = this.dialogData[systemType];
         this.startDialog(systemType, state.currentNpc, dialogData, state.currentIndex);
       } else {
@@ -250,16 +547,16 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     },
 
-    // 绑定对话按钮事件（修复多次点击重复渲染）
+    // 绑定对话按钮事件
     bindEvents(systemType, dialogData) {
-      document.querySelectorAll(`.${systemType}-dialog-system .talk-btn`).forEach(btn => {
+      const sectionEl = document.getElementById(systemType === 'ocean' ? 'oceanAdventure' : systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure');
+      sectionEl.querySelectorAll('.talk-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           if (e.currentTarget.disabled) return;
           
           const npcId = e.currentTarget.dataset.npc;
           const state = this.state[systemType];
           
-          // 修复：重复点击同一NPC时重置状态
           state.currentNpc = npcId;
           state.currentIndex = 0;
           
@@ -710,3 +1007,5 @@ document.addEventListener('DOMContentLoaded', function() {
   DialogSystem.init();
 });
 </script>
+</body>
+</html>
