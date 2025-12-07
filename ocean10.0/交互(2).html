@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>互动式电子海洋 - 交互系统</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* 基础样式 */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    /* Section 样式 */
+    .screen {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 900px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .screen.hidden {
+      display: none;
+    }
+
+    /* 标题样式 */
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(45deg, #3498db, #9b59b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h2 {
+      font-size: 2em;
+      color: #34495e;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin: 10px;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+      background: linear-gradient(45deg, #2980b9, #3498db);
+    }
+
+    /* 按钮组样式 */
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    /* NPC 列表样式 */
+    .npc-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .npc-item {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .npc-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .npc-item h3 {
+      margin: 0 0 15px 0;
+      color: #2c3e50;
+      font-size: 1.3em;
+    }
+
+    /* 对话容器样式 */
+    .ocean-dialog-container,
+    .bikini-dialog-container,
+    .rescue-dialog-container {
+      display: none;
+      margin-top: 30px;
+      padding: 25px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+      border: 2px solid;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .ocean-dialog-container {
+      border-color: #2e8b57;
+      background: linear-gradient(135deg, rgba(240, 255, 248, 0.9), rgba(255, 255, 255, 0.9));
+    }
+
+    .bikini-dialog-container {
+      border-color: #ffd700;
+      background: linear-gradient(135deg, rgba(255, 248, 230, 0.9), rgba(255, 255, 255, 0.9));
+    }
+
+    .rescue-dialog-container {
+      border-color: #1e90ff;
+      background: linear-gradient(135deg, rgba(230, 247, 255, 0.9), rgba(255, 255, 255, 0.9));
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ocean-dialog-speaker,
+    .bikini-dialog-speaker,
+    .rescue-dialog-speaker {
+      font-weight: bold;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .ocean-dialog-speaker {
+      color: #2e8b57;
+      border-left: 4px solid #2e8b57;
+    }
+
+    .bikini-dialog-speaker {
+      color: #ff8c00;
+      border-left: 4px solid #ff8c00;
+    }
+
+    .rescue-dialog-speaker {
+      color: #0066cc;
+      border-left: 4px solid #0066cc;
+    }
+
+    .ocean-dialog-content,
+    .bikini-dialog-content,
+    .rescue-dialog-content {
+      line-height: 1.8;
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 8px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .ocean-dialog-choices,
+    .bikini-dialog-choices,
+    .rescue-dialog-choices {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* 特殊系统按钮颜色 */
+    .ocean-dialog-choices .btn {
+      background: linear-gradient(45deg, #2e8b57, #27ae60);
+    }
+
+    .ocean-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #27ae60, #2e8b57);
+    }
+
+    .bikini-dialog-choices .btn {
+      background: linear-gradient(45deg, #ff8c00, #ff9500);
+    }
+
+    .bikini-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #ff9500, #ff8c00);
+    }
+
+    .rescue-dialog-choices .btn {
+      background: linear-gradient(45deg, #0066cc, #0077dd);
+    }
+
+    .rescue-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #0077dd, #0066cc);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .screen {
+        margin: 10px;
+        padding: 20px;
+      }
+      
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .npc-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .ocean-dialog-choices,
+      .bikini-dialog-choices,
+      .rescue-dialog-choices {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ① 交互首页 -->
+<section id="interactionHome" class="screen">
+  <h1>海底冒险交互系统</h1>
+  <div class="image-frame">
+    <img src="assets/home-image.png" alt="海洋场景" class="frame-image">
+  </div>
+  <div class="button-group">
+    <button id="goToOceanAdventure" class="btn">海底四乐章冒险</button>
+    <button id="goToBikiniStory" class="btn">比奇堡故事线</button>
+    <button id="goToRescueAdventure" class="btn">拯救洋流大冒险</button>
+  </div>
+</section>
+
+<!-- ② 海底四乐章冒险 -->
+<section id="oceanAdventure" class="screen hidden">
+  <h2>海底四乐章冒险</h2>
+  <button id="backToInteractionHome" class="btn">← 返回首页</button>
+  
+  <!-- NPC列表 -->
+  <div class="npc-list">
+    <div class="npc-item" id="npc-bubble">
+      <h3>泡泡（海底沙地）</h3>
+      <button class="talk-btn" data-npc="bubble" data-system="ocean">开始对话</button>
+    </div>
+    <div class="npc-item" id="npc-aku" style="opacity: 0.5;">
+      <h3>阿酷（沉船峡谷）</h3>
+      <button class="talk-btn" data-npc="aku" data-system="ocean" disabled>未解锁</button>
+    </div>
+    <div class="npc-item" id="npc-meimei" style="opacity: 0.5;">
+      <h3>小美美（海藻森林）</h3>
+      <button class="talk-btn" data-npc="meimei" data-system="ocean" disabled>未解锁</button>
+    </div>
+    <div class="npc-item" id="npc-tortoise" style="opacity: 0.5;">
+      <h3>双面龟（珊瑚迷宫）</h3>
+      <button class="talk-btn" data-npc="tortoise" data-system="ocean" disabled>未解锁</button>
+    </div>
+  </div>
+
+  <!-- 对话展示区域 -->
+  <div class="ocean-dialog-container">
+    <div class="ocean-dialog-speaker"></div>
+    <div class="ocean-dialog-content"></div>
+    <div class="ocean-dialog-choices"></div>
+  </div>
+</section>
+
+<!-- ③ 比奇堡故事线 -->
+<section id="bikiniStory" class="screen hidden">
+  <h2>比奇堡故事线</h2>
+  <button id="backToInteractionHome2" class="btn">← 返回首页</button>
+  
+  <!-- NPC列表 -->
+  <div class="npc-list">
+    <div class="npc-item" id="npc-spongebob">
+      <h3>海绵宝宝（沙滩）</h3>
+      <button class="talk-btn" data-npc="spongebob" data-system="bikini">开始对话</button>
+    </div>
+    <div class="npc-item" id="npc-patrick" style="opacity: 0.5;">
+      <h3>派大星（石头下）</h3>
+      <button class="talk-btn" data-npc="patrick" data-system="bikini" disabled>未解锁</button>
+    </div>
+    <div class="npc-item" id="npc-squidward" style="opacity: 0.5;">
+      <h3>章鱼哥（艺术小屋）</h3>
+      <button class="talk-btn" data-npc="squidward" data-system="bikini" disabled>未解锁</button>
+    </div>
+    <div class="npc-item" id="npc-mr-crab" style="opacity: 0.5;">
+      <h3>蟹老板（蟹堡王办公室）</h3>
+      <button class="talk-btn" data-npc="mr-crab" data-system="bikini" disabled>未解锁</button>
+    </div>
+  </div>
+
+  <!-- 对话展示区域 -->
+  <div class="bikini-dialog-container">
+    <div class="bikini-dialog-speaker"></div>
+    <div class="bikini-dialog-content"></div>
+    <div class="bikini-dialog-choices"></div>
+  </div>
+</section>
+
+<!-- ④ 拯救洋流大冒险 -->
+<section id="rescueAdventure" class="screen hidden">
+  <h2>拯救洋流大冒险</h2>
+  <button id="backToInteractionHome3" class="btn">← 返回首页</button>
+  
+  <!-- NPC列表 -->
+  <div class="npc-list">
+    <div class="npc-item" id="npc-nemo">
+      <h3>尼莫（珊瑚礁）</h3>
+      <button class="talk-btn" data-npc="nemo" data-system="rescue">开始对话</button>
+    </div>
+    <div class="npc-item" id="npc-dory" style="opacity: 0.5;">
+      <h3>多莉（海藻林）</h3>
+      <button class="talk-btn" data-npc="dory" data-system="rescue" disabled>未解锁</button>
+    </div>
+    <div class="npc-item" id="npc-marlin" style="opacity: 0.5;">
+      <h3>马琳（礁石区）</h3>
+      <button class="talk-btn" data-npc="marlin" data-system="rescue" disabled>未解锁</button>
+    </div>
+    <div class="npc-item" id="npc-bruce" style="opacity: 0.5;">
+      <h3>布鲁斯（深海洞穴）</h3>
+      <button class="talk-btn" data-npc="bruce" data-system="rescue" disabled>未解锁</button>
+    </div>
+  </div>
+
+  <!-- 对话展示区域 -->
+  <div class="rescue-dialog-container">
+    <div class="rescue-dialog-speaker"></div>
+    <div class="rescue-dialog-content"></div>
+    <div class="rescue-dialog-choices"></div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // ====================== 页面切换功能 ======================
+  function showScreen(screenId) {
+    // 隐藏所有屏幕
+    document.querySelectorAll('.screen').forEach(screen => {
+      screen.classList.add('hidden');
+    });
+    
+    // 显示目标屏幕
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+      targetScreen.classList.remove('hidden');
+    }
+  }
+
+  // 绑定首页按钮事件
+  document.getElementById('goToOceanAdventure').addEventListener('click', () => {
+    showScreen('oceanAdventure');
+  });
+  
+  document.getElementById('goToBikiniStory').addEventListener('click', () => {
+    showScreen('bikiniStory');
+  });
+  
+  document.getElementById('goToRescueAdventure').addEventListener('click', () => {
+    showScreen('rescueAdventure');
+  });
+
+  // 绑定返回按钮事件
+  document.getElementById('backToInteractionHome').addEventListener('click', () => {
+    showScreen('interactionHome');
+  });
+  
+  document.getElementById('backToInteractionHome2').addEventListener('click', () => {
+    showScreen('interactionHome');
+  });
+  
+  document.getElementById('backToInteractionHome3').addEventListener('click', () => {
+    showScreen('interactionHome');
+  });
+
+  // ====================== 对话系统 ======================
+  const DialogSystem = {
+    // 状态管理
+    state: {
+      ocean: { currentNpc: null, currentIndex: 0 },
+      bikini: { currentNpc: null, currentIndex: 0 },
+      rescue: { currentNpc: null, currentIndex: 0 }
+    },
+
+    // 通用对话启动函数
+    startDialog(systemType, npcId, dialogData, currentIndex) {
+      if (!dialogData || !dialogData[npcId]) {
+        console.error(`[${systemType}] 找不到该NPC的对话数据:`, npcId);
+        return { success: false };
+      }
+
+      const sectionEl = document.getElementById(systemType === 'ocean' ? 'oceanAdventure' : systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure');
+      const dialogContainer = sectionEl.querySelector(`.${systemType}-dialog-container`);
+      const speakerEl = dialogContainer.querySelector(`.${systemType}-dialog-speaker`);
+      const contentEl = dialogContainer.querySelector(`.${systemType}-dialog-content`);
+      const choicesEl = dialogContainer.querySelector(`.${systemType}-dialog-choices`);
+
+      const currentDialog = dialogData[npcId][currentIndex];
+      if (!currentDialog) {
+        console.error(`[${systemType}] 找不到该索引的对话:`, npcId, currentIndex);
+        return { success: false };
+      }
+
+      // 重置容器状态
+      choicesEl.innerHTML = '';
+      dialogContainer.style.display = 'block';
+
+      // 渲染对话内容
+      speakerEl.textContent = currentDialog.speaker;
+      contentEl.textContent = currentDialog.content;
+
+      // 生成选项按钮
+      currentDialog.choices.forEach((choice) => {
+        const choiceBtn = document.createElement('button');
+        choiceBtn.textContent = choice.text;
+        choiceBtn.className = 'btn';
+        
+        // 按系统区分按钮颜色
+        const btnColorMap = {
+          ocean: { normal: "#2e8b57", hover: "#1e6b3f" },
+          bikini: { normal: "#ff8c00", hover: "#e67a00" },
+          rescue: { normal: "#0066cc", hover: "#0052a3" }
+        };
+        const colors = btnColorMap[systemType];
+        choiceBtn.style.background = colors.normal;
+        
+        // 添加hover效果
+        choiceBtn.addEventListener('mouseover', () => {
+          choiceBtn.style.background = colors.hover;
+        });
+        choiceBtn.addEventListener('mouseout', () => {
+          choiceBtn.style.background = colors.normal;
+        });
+      
+        choiceBtn.addEventListener('click', () => {
+          if (choice.unlock) {
+            this.unlockNpc(systemType, choice.unlock);
+          }
+          this.handleChoice(systemType, choice);
+        });
+        
+        choicesEl.appendChild(choiceBtn);
+      });
+
+      return { success: true, container: dialogContainer };
+    },
+
+    // 通用NPC解锁函数（修复样式遗漏、鲁棒性）
+    unlockNpc(systemType, unlockNpcId) {
+      const nextNpcItem = document.getElementById(`npc-${unlockNpcId}`);
+      if (!nextNpcItem) {
+        console.warn(`[${systemType}] 要解锁的NPC不存在:`, unlockNpcId);
+        return null;
+      }
+
+      const nextNpcBtn = nextNpcItem.querySelector('.talk-btn');
+      if (!nextNpcBtn) {
+        console.warn(`[${systemType}] NPC ${unlockNpcId} 没有对话按钮`);
+        return null;
+      }
+
+      // 按系统区分解锁后的样式（修复样式遗漏）
+      const styleMap = {
+        ocean: { 
+          borderColor: '#2e8b57', 
+          background: '#f0fff8', 
+          btnBg: '#2e8b57',
+          textColor: '#2e8b57'
+        },
+        bikini: { 
+          borderColor: '#ffd700', 
+          background: '#fff8e6', 
+          btnBg: '#ff8c00',
+          textColor: '#ff8c00'
+        },
+        rescue: { 
+          borderColor: '#1e90ff', 
+          background: '#e6f7ff', 
+          btnBg: '#0066cc',
+          textColor: '#0066cc'
+        }
+      };
+      const styles = styleMap[systemType];
+
+      // 解锁样式更新
+      nextNpcItem.style.opacity = '1';
+      nextNpcItem.style.border = `1px solid ${styles.borderColor}`;
+      nextNpcItem.style.background = styles.background;
+      nextNpcItem.querySelector('h3').style.color = styles.textColor;
+      
+      nextNpcBtn.textContent = '开始对话';
+      nextNpcBtn.style.background = styles.btnBg;
+      nextNpcBtn.style.color = 'white';
+      nextNpcBtn.disabled = false;
+      nextNpcBtn.style.cursor = 'pointer';
+      nextNpcBtn.style.transition = 'background 0.2s';
+      
+      // 滚动到解锁的NPC
+      nextNpcItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return nextNpcBtn;
+    },
+
+    // 选择处理函数
+    handleChoice(systemType, choice) {
+      const state = this.state[systemType];
+      const sectionEl = document.getElementById(systemType === 'ocean' ? 'oceanAdventure' : systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure');
+      const dialogContainer = sectionEl.querySelector(`.${systemType}-dialog-container`);
+      
+      if (choice.next !== null && choice.next !== undefined) {
+        state.currentIndex = choice.next;
+        const dialogData = this.dialogData[systemType];
+        this.startDialog(systemType, state.currentNpc, dialogData, state.currentIndex);
+      } else {
+        // 关闭对话容器，重置状态
+        dialogContainer.style.display = 'none';
+        state.currentNpc = null;
+        state.currentIndex = 0;
+      }
+    },
+
+    // 绑定对话按钮事件
+    bindEvents(systemType, dialogData) {
+      const sectionEl = document.getElementById(systemType === 'ocean' ? 'oceanAdventure' : systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure');
+      sectionEl.querySelectorAll('.talk-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (e.currentTarget.disabled) return;
+          
+          const npcId = e.currentTarget.dataset.npc;
+          const state = this.state[systemType];
+          
+          state.currentNpc = npcId;
+          state.currentIndex = 0;
+          
+          this.startDialog(systemType, npcId, dialogData, state.currentIndex);
+        });
+      });
+    },
+
+    // 对话数据存储（集中管理）
+    dialogData: {
+      // ====================== 1. 海底四乐章冒险对话数据 ======================
+      ocean: {
+        "bubble": [
+          {
+            speaker: "泡泡",
+            content: "旅行者，我正在海底沙地的彩虹石阵旁发愁呢！阿酷总提什么‘悲伤美学’，小美美那边也遇上了麻烦…你想先了解哪件事？",
+            choices: [
+              { text: "追问‘悲伤美学’是什么", next: 1, unlock: "aku" },
+              { text: "直接问小美美的事", next: 3, unlock: "aku" }
+            ]
+          },
+          {
+            speaker: "泡泡",
+            content: "阿酷说悲伤也有独特的美学价值，但我总觉得快乐才是最珍贵的！你觉得呢？",
+            choices: [
+              { text: "安慰他：快乐艺术才最珍贵", next: 2 },
+              { text: "建议他：表现出快乐的重量", next: 2 }
+            ]
+          },
+          {
+            speaker: "泡泡",
+            content: "谢谢你的理解！不管怎样，石塔倒塌后露出了前往阿酷沉船峡谷的线索，你快去找他吧，记得带上我给你的彩虹螺壳和勇气核心石！",
+            choices: [
+              { text: "收下物品，前往找阿酷", next: null }
+            ]
+          },
+          {
+            speaker: "泡泡",
+            content: "小美美被梭子蟹监视了，他们想采集她的声波！你想知道更多细节吗？",
+            choices: [
+              { text: "问：他们具体想做什么", next: 4 },
+              { text: "问：阿酷对此怎么看", next: 4 }
+            ]
+          },
+          {
+            speaker: "泡泡",
+            content: "阿酷说需要声波探测器才能帮小美美！这是我找到的探测器，你拿上去找阿酷吧，他在沉船峡谷等着呢，还有彩虹螺壳和安全小路情报给你！",
+            choices: [
+              { text: "收下探测器，去找阿酷", next: null }
+            ]
+          }
+        ],
+        "aku": [
+          {
+            speaker: "阿酷",
+            content: "你带着泡泡的彩虹螺壳来了？我正验证它的光纹呢…小美美需要‘共鸣校准器’才能摆脱监视，你想先了解肥鲶鱼的事，还是我的研究？",
+            choices: [
+              { text: "问肥鲶鱼手下的事", next: 1, unlock: "meimei" },
+              { text: "问你的宇宙不确定性研究课题", next: 3, unlock: "meimei" }
+            ]
+          },
+          {
+            speaker: "阿酷",
+            content: "肥鲶鱼的手下一直在收集海底能量，他们的警告语我都记下来了…你想知道他们的最终目标吗？",
+            choices: [
+              { text: "记下警告语就行", next: 2 },
+              { text: "追问他们的最终目标", next: 2 }
+            ]
+          },
+          {
+            speaker: "阿酷",
+            content: "不管怎样，这是共鸣校准器和光纹干扰器！梭子蟹的录音设备会失灵1分钟，你快去海藻森林找小美美吧，她急需帮助！",
+            choices: [
+              { text: "收下物品，去找小美美", next: null }
+            ]
+          },
+          {
+            speaker: "阿酷",
+            content: "我的研究需要更多数据才能帮小美美，你愿意协助我吗？",
+            choices: [
+              { text: "愿意助力你的研究", next: 4 },
+              { text: "问研究和小美的麻烦关联", next: 4 }
+            ]
+          },
+          {
+            speaker: "阿酷",
+            content: "谢谢你的配合！这是共鸣校准器和巡逻盲区路径，海藻森林的路更安全了，快去找到小美美，她的珍珠麦克风快撑不住了！",
+            choices: [
+              { text: "收下物品，去找小美美", next: null }
+            ]
+          }
+        ],
+        "meimei": [
+          {
+            speaker: "小美美",
+            content: "你带着阿酷的共鸣校准器来了！梭子蟹还在监视我，我的珍珠麦克风里有初代海妖颤音…你更关心麦克风的故事，还是监视的现状？",
+            choices: [
+              { text: "关注麦克风与海妖的故事", next: 1, unlock: "tortoise" },
+              { text: "关注监视现状和双面龟的事", next: 3, unlock: "tortoise" }
+            ]
+          },
+          {
+            speaker: "小美美",
+            content: "这颗珍珠麦克风是海妖的遗物，只要带着心意演奏，声音就能被海底所有生物感受到…你觉得我该怎么做？",
+            choices: [
+              { text: "鼓励她：心意能被感受", next: 2 },
+              { text: "建议她：用精确方法演奏", next: 2 }
+            ]
+          },
+          {
+            speaker: "小美美",
+            content: "谢谢你的鼓励！珍珠光芒稳定了，这是诚意鳞片（会变色），还有星贝情绪阈值的情报，你快去珊瑚迷宫找双面龟吧，他有《海底声学秘典》的线索！",
+            choices: [
+              { text: "收下鳞片，去找双面龟", next: null }
+            ]
+          },
+          {
+            speaker: "小美美",
+            content: "双面龟说梭子蟹的监视网有漏洞，但他好像藏了些事…你觉得他在撒谎吗？还是想知道《海底声学秘典》203页的事？",
+            choices: [
+              { text: "问：说明他在撒谎？", next: 4 },
+              { text: "问《海底声学秘典》203页", next: 4 }
+            ]
+          },
+          {
+            speaker: "小美美",
+            content: "双面龟没撒谎，只是怕肥鲶鱼报复！这是珊瑚迷宫的坐标和信任暗号，你拿上诚意鳞片去找他吧，他能帮你拿到《秘典》203页！",
+            choices: [
+              { text: "收下暗号，去找双面龟", next: null }
+            ]
+          }
+        ],
+        "tortoise": [
+          {
+            speaker: "双面龟",
+            content: "你带着小美的诚意鳞片来了！我已经三重验证过了，想要《海底声学秘典》203页，得用‘深渊共振液’来换…你想先问注意事项，还是肥鲶鱼的危险？",
+            choices: [
+              { text: "问注意事项和古籍148页", next: 1 },
+              { text: "问肥鲶鱼的目的和危险", next: 3 }
+            ]
+          },
+          {
+            speaker: "双面龟",
+            content: "古籍148页是肥鲶鱼的弱点！去北海礁黑市交易时要冷静，你知道该怎么应对肥鲶鱼吗？",
+            choices: [
+              { text: "冷静问应对方法", next: 2 },
+              { text: "分享情报辅助你分析", next: 2 }
+            ]
+          },
+          {
+            speaker: "双面龟",
+            content: "做得好！这是密封星贝容器和短期记忆强化液（能让肥鲶鱼记忆周期缩到5分钟），去黑市交易时提‘想要148页’能分心他，快去完成任务吧！",
+            choices: [
+              { text: "收下容器，前往北海礁黑市", next: null }
+            ]
+          },
+          {
+            speaker: "双面龟",
+            content: "肥鲶鱼想要用深渊共振液激活海妖颤音，控制整个海底洋流！你要立刻出发，还是先设置假情报？",
+            choices: [
+              { text: "接受任务立刻离开", next: 4 },
+              { text: "提议设置假情报节点", next: 4 }
+            ]
+          },
+          {
+            speaker: "双面龟",
+            content: "太聪明了！这是带诱饵数据包的密封星贝容器，能帮你争取验证时间，去北海礁黑市找肥鲶鱼交易时，一定要诱他说出‘古籍第148页’！",
+            choices: [
+              { text: "收下容器，执行交易任务", next: null }
+            ]
+          }
+        ]
+      },
+
+      // ====================== 2. 比奇堡故事线对话数据 ======================
+      bikini: {
+        "spongebob": [
+          {
+            speaker: "海绵宝宝",
+            content: "嘿！新朋友！看我的‘永不沉没比奇堡号’沙堡！派大星居然说沙子是‘星星碎渣渣’，就因为他捡了块发光的星核石！你觉得沙子做的沙堡很酷对不对？",
+            choices: [
+              { text: "超酷！沙堡做得超棒", next: 1, unlock: "patrick" },
+              { text: "一般般吧，沙子确实普通", next: 2, unlock: "patrick" }
+            ]
+          },
+          {
+            speaker: "海绵宝宝",
+            content: "哇！谢谢你的认可！派大星就在那边石头底下，整天抱着星核石‘思考人生’，你可以去找他聊聊～ 对了，章鱼哥在他的艺术小屋，他超爱被夸有才华！",
+            choices: [
+              { text: "好呀，去看看派大星", next: null }
+            ]
+          },
+          {
+            speaker: "海绵宝宝",
+            content: "哼，派大星也这么说！不过他的星核石确实有点神奇，凉飕飕硬邦邦的～ 你去问问他呗，说不定他会分享给你看！章鱼哥就在旁边小屋，记得别惹他生气哦！",
+            choices: [
+              { text: "好吧，去找派大星问问", next: null }
+            ]
+          }
+        ],
+        "patrick": [
+          {
+            speaker: "派大星",
+            content: "嘘…我在和星核石‘调频’呢！它说想它的宇宙兄弟姐妹了～ 你身上有没有那种凉飕飕、硬邦邦、从很远地方来的味道？",
+            choices: [
+              { text: "没有呀，我没带这种石头", next: 1, unlock: "squidward" },
+              { text: "有！你看这个（掏出星核石）", next: 3, unlock: "squidward" }
+            ]
+          },
+          {
+            speaker: "派大星",
+            content: "哦…那太可惜了，我脑子今天缺‘星际润滑油’～ 隔壁章鱼哥吹竖笛超催眠，但他自尊心比水母皮还薄！你得会‘哄’他才能聊，想去试试吗？",
+            choices: [
+              { text: "去看看章鱼哥的艺术", next: 2 },
+              { text: "不想聊，换个目标", next: 2 }
+            ]
+          },
+          {
+            speaker: "派大星",
+            content: "章鱼哥的小屋就在那边！记得夸他的画或竖笛，别直接说看不懂～ 蟹老板的蟹堡王也在附近，他啥情报都要‘诚意’换！",
+            choices: [
+              { text: "记下了，出发", next: null }
+            ]
+          },
+          {
+            speaker: "派大星",
+            content: "哇！波长对上了！这手感比海蜗牛的梦还冰凉！你从哪儿搞到的？快让我摸摸～ 章鱼哥肯定会嫉妒这个‘宇宙级宝贝’，你可以拿给他看看，说不定他会对你改观！",
+            choices: [
+              { text: "好，带去找章鱼哥", next: null }
+            ]
+          }
+        ],
+        "squidward": [
+          {
+            speaker: "章鱼哥",
+            content: "又是被海绵宝宝带过来的？走开！我的灵感正在难产…等等，你身上有没有‘没被钱玷污的欣赏者’气质？",
+            choices: [
+              { text: "假装懂：这画充满内心挣扎，超有深度", next: 1, unlock: "mr-crab" },
+              { text: "直接问：这画到底画的是啥？", next: 3, unlock: "mr-crab" }
+            ]
+          },
+          {
+            speaker: "章鱼哥",
+            content: "哼，还算你有点眼光！比奇堡只有我和蟹阿金懂‘价值’——他满脑子钞票，啥都能标价！你要情报就得带‘诚意’找他，我只需要艺术赞助～ 你想去蟹堡王吗？",
+            choices: [
+              { text: "去蟹堡王找蟹老板", next: 2 },
+              { text: "还是算了，先逛逛", next: 2 }
+            ]
+          },
+          {
+            speaker: "章鱼哥",
+            content: "蟹堡王在沙滩东边，后门进去就是他办公室！记得别提‘免费’两个字，他会炸毛的～",
+            choices: [
+              { text: "收到，出发去蟹堡王", next: null }
+            ]
+          },
+          {
+            speaker: "章鱼哥",
+            content: "出去！庸俗的人不配进我的殿堂！（暴躁赶人）… 等等，要找蟹老板就从东边走，他的办公室在蟹堡王后门，记得带‘诚意’——他的情报可不免费！",
+            choices: [
+              { text: "知道了，去找蟹老板", next: null }
+            ]
+          }
+        ],
+        "mr-crab": [
+          {
+            speaker: "蟹老板",
+            content: "进来前蹭蹭脚！我这儿不欢迎免费的灰～ 新来的？想打听比奇堡的事？很好！时间就是钱，等价交换懂不懂？亮出你的‘诚意’，我就展开我的情报网！",
+            choices: [
+              { text: "问：你说的‘诚意’是指什么？", next: 1 },
+              { text: "问：痞老板最近有啥小动作？", next: 1 }
+            ]
+          },
+          {
+            speaker: "蟹老板",
+            content: "诚意？当然是能换钱的东西！或者帮我盯着痞老板——他最近偷偷摸摸搞小动作，肯定想偷我的蟹黄堡秘方！想直接见他？得是‘超级大投资’才行！你愿意做笔交易吗？",
+            choices: [
+              { text: "愿意，我带了‘诚意’", next: 2 },
+              { text: "算了，暂时没兴趣", next: 2 }
+            ]
+          },
+          {
+            speaker: "蟹老板",
+            content: "识时务者为俊杰！（搓钳子）随时来找我兑现交易，只要价码合适，比奇堡没有我找不到的情报～ 痞老板的老巢在蟹堡王对面，你可别自己闯进去！",
+            choices: [
+              { text: "记下了，谢谢蟹老板", next: null }
+            ]
+          }
+        ]
+      },
+
+      // ====================== 3. 拯救洋流大冒险对话数据 ======================
+      rescue: {
+        "nemo": [
+          {
+            speaker: "尼莫",
+            content: "哇！你长得不像这片海的鱼！看我的发光珊瑚——一闪安全、两闪小心、三闪危险！现在三闪啦！你想知道珊瑚为啥神奇，还是直接问危险是什么？",
+            choices: [
+              { text: "哇！珊瑚好神奇，到底啥危险？", next: 1, unlock: "dory" },
+              { text: "危险？是鲨鱼还是人类扔垃圾了？", next: 3, unlock: "dory" }
+            ]
+          },
+          {
+            speaker: "尼莫",
+            content: "是北边海藻林的洋流乱啦！好多小鱼迷路找爸爸妈妈～ 我爸爸马琳是洋流专家，多莉阿姨熟路（就是记性偶尔掉线）！你觉得是什么挡住了水流？",
+            choices: [
+              { text: "可能是人类的废弃渔网缠住礁石了", next: 2 },
+              { text: "说不定是超大礁石挡路了", next: 2 }
+            ]
+          },
+          {
+            speaker: "尼莫",
+            content: "耶！我也这么觉得！多莉阿姨在海藻林等我们，她知道漩涡的位置～ 快跟我来，咱们组队找她汇合！",
+            choices: [
+              { text: "好，出发去海藻林找多莉", next: null }
+            ]
+          },
+          {
+            speaker: "尼莫",
+            content: "不是鲨鱼哦！是洋流出问题啦～ 大概率是人类的废弃渔网缠住礁石！我爸爸马琳在礁石区观察，多莉阿姨在海藻林找渔网位置，咱们先去找多莉吧？",
+            choices: [
+              { text: "走！去找多莉阿姨", next: null }
+            ]
+          }
+        ],
+        "dory": [
+          {
+            speaker: "多莉",
+            content: "帮手！新朋友！太好了！海藻林深处有旋转漩涡，我差点被卷进去～ 你想知道漩涡的方向，还是想确认是不是渔网搞的鬼？",
+            choices: [
+              { text: "旋转漩涡在哪？你能带我去吗？", next: 1, unlock: "marlin" },
+              { text: "漩涡是因为渔网缠住礁石了吗？你记不记得位置？", next: 3, unlock: "marlin" }
+            ]
+          },
+          {
+            speaker: "尼莫（补充）",
+            content: "多莉阿姨记路超准，但偶尔忘方向！她上次说跟着‘唱歌的贝壳’能找到漩涡——水流一冲就叮叮当当响！我爸爸在礁石区等我们，先找他更安全～",
+            choices: [
+              { text: "好，先去礁石区找马琳", next: 2 },
+              { text: "直接跟着唱歌的贝壳找漩涡", next: 2 }
+            ]
+          },
+          {
+            speaker: "多莉",
+            content: "对！唱歌的贝壳！礁石区在东边，我带你去～ 马琳肯定想好办法了！",
+            choices: [
+              { text: "出发去礁石区", next: null }
+            ]
+          },
+          {
+            speaker: "尼莫（补充）",
+            content: "对！就是渔网！多莉阿姨说渔网缠在有好多彩色小贝壳的礁石上！我爸爸已经在观察漩涡水流了，咱们快去找他，他知道怎么拆渔网～",
+            choices: [
+              { text: "走，去找马琳汇合", next: null }
+            ]
+          }
+        ],
+        "marlin": [
+          {
+            speaker: "马琳",
+            content: "感谢你帮忙，朋友！确实是废弃渔网缠住礁石形成人工漩涡，挡偏了洋流～ 你想直接用潜水刀拆渔网，还是担心力气不够想找帮手？",
+            choices: [
+              { text: "直接拆！我有潜水刀", next: 1, unlock: "bruce" },
+              { text: "渔网肯定很结实，要不要找帮手？", next: 3, unlock: "bruce" }
+            ]
+          },
+          {
+            speaker: "尼莫（提醒）",
+            content: "不行呀！漩涡中心水流太急，会被渔网缠住的！潜水刀也割不断粗渔网～ 我爸爸说布鲁斯叔叔是深海‘温柔大力士’，能咬断渔网，还爱吃多莉阿姨的海藻饼干！",
+            choices: [
+              { text: "那去找布鲁斯帮忙", next: 2 },
+              { text: "再想想其他办法", next: 2 }
+            ]
+          },
+          {
+            speaker: "马琳",
+            content: "布鲁斯住在深海洞穴，尼莫带你去采集发光贝壳（照明用），我和多莉去取海藻饼干，咱们在洞穴入口汇合～",
+            choices: [
+              { text: "好，分工行动，去深海洞穴", next: null }
+            ]
+          },
+          {
+            speaker: "尼莫（兴奋）",
+            content: "对！我和爸爸、多莉阿姨试过拉渔网，根本拉不动！布鲁斯叔叔最靠谱了！我知道哪里有发光贝壳，带你去采集，爸爸和多莉去拿海藻饼干，洞穴入口汇合～",
+            choices: [
+              { text: "走，采集发光贝壳去", next: 4 },
+              { text: "我先去洞穴入口等你们", next: 4 }
+            ]
+          },
+          {
+            speaker: "多莉",
+            content: "海藻饼干在左边第三块大礁石下（石头上有粉色海葵）！我取完就去洞穴入口找你们～",
+            choices: [
+              { text: "收到，出发去深海洞穴", next: null }
+            ]
+          }
+        ],
+        "bruce": [
+          {
+            speaker: "布鲁斯",
+            content: "马琳！多莉！尼莫！还有新朋友，欢迎欢迎！这些发光贝壳真漂亮，正好能照亮漩涡中心～ 你们找我是想让我帮忙拆渔网，还是单纯来送海藻饼干呀？",
+            choices: [
+              { text: "布鲁斯，求你帮忙拆渔网！小鱼们都迷路了", next: 1 },
+              { text: "这是多莉做的海藻饼干，想请你一起拯救洋流", next: 3 }
+            ]
+          },
+          {
+            speaker: "尼莫（补充）",
+            content: "布鲁斯叔叔，漩涡水流好急，好多小鱼差点被卷进去，我们拆不动渔网，只能找你帮忙了！",
+            choices: [
+              { text: "拜托你了，布鲁斯", next: 2 }
+            ]
+          },
+          {
+            speaker: "布鲁斯",
+            content: "没问题！帮助海洋伙伴义不容辞！多莉的手艺还是这么好～ 尼莫待在安全区帮我们照亮渔网，咱们分工合作，现在出发去漩涡区！",
+            choices: [
+              { text: "冲呀！拯救洋流大冒险！", next: null }
+            ]
+          },
+          {
+            speaker: "尼莫（补充）",
+            content: "布鲁斯叔叔，有你的力气一定能拆了渔网！让洋流恢复正常，小鱼们就能回家啦！",
+            choices: [
+              { text: "一起加油！", next: 4 }
+            ]
+          },
+          {
+            speaker: "布鲁斯",
+            content: "太感谢啦！这是我的最爱～ 尼莫长大了真勇敢！你待在马琳身边照明渔网细节，咱们现在出发，清理掉渔网！",
+            choices: [
+              { text: "出发去漩涡区！", next: null }
+            ]
+          }
+        ]
+      }
+    },
+
+    // 初始化所有事件绑定
+    init() {
+      this.bindEvents('ocean', this.dialogData.ocean);
+      this.bindEvents('bikini', this.dialogData.bikini);
+      this.bindEvents('rescue', this.dialogData.rescue);
+    }
+  };
+
+  // 初始化对话系统
+  DialogSystem.init();
+});
+</script>
+</body>
+</html>
