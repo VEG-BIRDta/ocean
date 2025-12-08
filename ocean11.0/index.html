@@ -1,0 +1,2563 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title>互动式电子海洋</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* 全局样式 */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* 剧情模式样式 */
+    body.story-mode {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Section 样式 */
+    .screen {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 900px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      position: relative;
+      min-height: 500px;
+    }
+
+    .screen.hidden {
+      display: none;
+    }
+
+    /* 首页全背景样式 - 粉蓝色 */
+    #home {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: 0;
+      padding: 0;
+      max-width: 100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    #home h1 {
+      color: white;
+      font-size: 3em;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+      margin-bottom: 40px;
+    }
+
+    #home .image-frame {
+      margin: 30px 0;
+      border: 5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    #home .button-group {
+      margin-top: 40px;
+    }
+
+    #home .btn {
+      font-size: 1.2em;
+      padding: 15px 30px;
+      margin: 10px 20px;
+      background: linear-gradient(45deg, #64b5f6, #42a5f5);
+      box-shadow: 0 4px 15px rgba(66, 165, 245, 0.4);
+    }
+
+    #home .btn:hover {
+      background: linear-gradient(45deg, #42a5f5, #64b5f6);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(66, 165, 245, 0.5);
+    }
+
+    #home .btn:nth-child(3) {
+      background: linear-gradient(45deg, #9b59b6, #3498db);
+    }
+
+    #home .btn:nth-child(3):hover {
+      background: linear-gradient(45deg, #3498db, #9b59b6);
+    }
+
+    /* 绘画页面渐变白色背景 */
+    #draw {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: 0;
+      padding: 20px;
+      max-width: 100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 0;
+      overflow: auto;
+    }
+
+    #draw h2 {
+      color: #2c3e50;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 海洋页面按钮布局 */
+    #sea {
+      position: relative;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100vh;
+      max-width: 100%;
+      border-radius: 0;
+      overflow: hidden;
+    }
+
+    #sea #ocean {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 左上角按钮组 - 改进布局 */
+    .sea-top-left {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, auto);
+      gap: 15px;
+      z-index: 100;
+      width: 320px;
+    }
+
+    .sea-top-left .btn {
+      width: 150px;
+      text-align: center;
+      margin: 0;
+      padding: 12px 15px;
+      font-size: 14px;
+    }
+
+    /* 清除按钮特殊样式 */
+    #clearDataBtn {
+      background: linear-gradient(45deg, #e74c3c, #c0392b);
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    #clearDataBtn:hover {
+      background: linear-gradient(45deg, #c0392b, #e74c3c);
+    }
+
+    /* 按钮位置分配 */
+    #feedBtn {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    #showFishes {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    #back {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    /* 左下角按钮 */
+    .sea-bottom-left {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 100;
+    }
+
+    .sea-bottom-left .btn {
+      width: 150px;
+      padding: 12px 15px;
+    }
+
+    /* 右上角信息 */
+    .sea-top-right {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+      z-index: 100;
+    }
+
+    .sea-top-right .shell-count {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+      color: #2c3e50;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      min-width: 120px;
+      text-align: center;
+    }
+
+    /* 商店按钮样式 */
+    #toStoreBtnSea {
+      width: 150px;
+      margin-top: 10px;
+    }
+
+    /* 标题样式 */
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(45deg, #3498db, #9b59b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h2 {
+      font-size: 2em;
+      color: #34495e;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin: 10px;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+      background: linear-gradient(45deg, #2980b9, #3498db);
+    }
+
+    /* 按钮组样式 */
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    /* NPC 列表样式 */
+    .npc-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .npc-item {
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .npc-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .npc-item h3 {
+      margin: 0 0 15px 0;
+      color: #2c3e50;
+      font-size: 1.3em;
+    }
+
+    /* 修改：对话容器样式 - 往上调整 */
+    .ocean-dialog-container,
+    .bikini-dialog-container,
+    .rescue-dialog-container {
+      display: none;
+      position: fixed; /* 改为固定定位 */
+      top: 50px; /* 距离顶部更近 */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      max-height: 70vh; /* 限制最大高度 */
+      margin-top: 20px;
+      padding: 25px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 250, 0.98));
+      border: 2px solid;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.5s ease-in-out;
+      z-index: 1000;
+      overflow-y: auto; /* 允许垂直滚动 */
+    }
+
+    .ocean-dialog-container {
+      border-color: #2e8b57;
+      background: linear-gradient(135deg, rgba(240, 255, 248, 0.98), rgba(255, 255, 255, 0.98));
+    }
+
+    .bikini-dialog-container {
+      border-color: #ffd700;
+      background: linear-gradient(135deg, rgba(255, 248, 230, 0.98), rgba(255, 255, 255, 0.98));
+    }
+
+    .rescue-dialog-container {
+      border-color: #1e90ff;
+      background: linear-gradient(135deg, rgba(230, 247, 255, 0.98), rgba(255, 255, 255, 0.98));
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .ocean-dialog-speaker,
+    .bikini-dialog-speaker,
+    .rescue-dialog-speaker {
+      font-weight: bold;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .ocean-dialog-speaker {
+      color: #2e8b57;
+      border-left: 4px solid #2e8b57;
+    }
+
+    .bikini-dialog-speaker {
+      color: #ff8c00;
+      border-left: 4px solid #ff8c00;
+    }
+
+    .rescue-dialog-speaker {
+      color: #0066cc;
+      border-left: 4px solid #0066cc;
+    }
+
+    .ocean-dialog-content,
+    .bikini-dialog-content,
+    .rescue-dialog-content {
+      line-height: 1.8;
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 8px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+      max-height: 200px; /* 限制内容高度 */
+      overflow-y: auto; /* 内容过多时滚动 */
+    }
+
+    /* 修改：对话选项样式 - 确保始终可见 */
+    .ocean-dialog-choices,
+    .bikini-dialog-choices,
+    .rescue-dialog-choices {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding-top: 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      position: sticky; /* 粘性定位 */
+      bottom: 0;
+      z-index: 10;
+    }
+
+    /* 特殊系统按钮颜色 */
+    .ocean-dialog-choices .btn {
+      background: linear-gradient(45deg, #2e8b57, #27ae60);
+      min-width: 120px;
+    }
+
+    .ocean-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #27ae60, #2e8b57);
+    }
+
+    .bikini-dialog-choices .btn {
+      background: linear-gradient(45deg, #ff8c00, #ff9500);
+      min-width: 120px;
+    }
+
+    .bikini-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #ff9500, #ff8c00);
+    }
+
+    .rescue-dialog-choices .btn {
+      background: linear-gradient(45deg, #0066cc, #0077dd);
+      min-width: 120px;
+    }
+
+    .rescue-dialog-choices .btn:hover {
+      background: linear-gradient(45deg, #0077dd, #0066cc);
+    }
+
+    /* NPC解锁提示样式 */
+    .npc-unlocked {
+      animation: unlockPulse 1s ease-in-out;
+      border-color: #4CAF50 !important;
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+    }
+
+    @keyframes unlockPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* 未解锁NPC样式 */
+    .npc-locked {
+      opacity: 0.5;
+      filter: grayscale(70%);
+      pointer-events: none;
+    }
+
+    .npc-locked h3::after {
+      content: " (商店解锁)";
+      font-size: 0.8em;
+      color: #e74c3c;
+      font-weight: normal;
+    }
+
+    /* 剧情模式样式调整 */
+    .story-title {
+      background: linear-gradient(45deg, #9b59b6, #3498db);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    /* 对话按钮特殊样式 */
+    .talk-btn {
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+      font-size: 14px;
+      min-width: 100px;
+      display: inline-block;
+    }
+
+    /* 剧情模式页面增加底部边距，为对话框留出空间 */
+    #oceanAdventure,
+    #bikiniStory,
+    #rescueAdventure {
+      padding-bottom: 150px; /* 为固定对话框留出空间 */
+      position: relative;
+      min-height: 600px;
+    }
+
+    /* 返回按钮固定在左上角 */
+    #backToStoryHome,
+    #backToStoryHome2,
+    #backToStoryHome3 {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+    }
+
+    /* ================ 新增：商店美化样式（横向排列） ================ */
+    /* 商店商品项样式 - 横向排列 */
+    .store-item {
+      border-radius: 12px;
+      padding: 15px;
+      background: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 2px solid #e0e0e0;
+      position: relative;
+      overflow: hidden;
+      width: 200px; /* 固定宽度 */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* 已购买的商品 - 彩色显示 */
+    .store-item.purchased {
+      border-color: #4CAF50;
+      background: linear-gradient(135deg, #f8fff8, #ffffff);
+    }
+
+    .store-item.purchased .item-img {
+      filter: none !important;
+      opacity: 1 !important;
+    }
+
+    .store-item.purchased h3 {
+      color: #2c3e50;
+    }
+
+    .store-item.purchased .item-price {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+
+    /* 未购买的商品 - 灰色显示 */
+    .store-item:not(.purchased) {
+      opacity: 0.7;
+      background: linear-gradient(135deg, #f5f5f5, #ffffff);
+    }
+
+    .store-item:not(.purchased) .item-img {
+      filter: grayscale(100%);
+      opacity: 0.6;
+    }
+
+    .store-item:not(.purchased) h3 {
+      color: #95a5a6;
+    }
+
+    .store-item:not(.purchased) .item-price {
+      color: #bdc3c7;
+    }
+
+    /* 已购买的标签 */
+    .purchased-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #4CAF50;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 2;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* 商品图片容器 */
+    .item-image {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 15px;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+    }
+
+    .item-img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      transition: all 0.3s ease;
+    }
+
+    /* 进度条样式 */
+    .progress-series {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .progress-series-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .progress-series-title .count {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    /* 进度条容器 */
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #ecf0f1;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 进度条填充部分 */
+    .progress-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+      position: relative;
+    }
+
+    /* 不同系列的进度条颜色 */
+    .spongebob-progress {
+      background: linear-gradient(90deg, #ffd700, #ff8c00);
+    }
+
+    .fish-adventure-progress {
+      background: linear-gradient(90deg, #1abc9c, #16a085);
+    }
+
+    .finding-nemo-progress {
+      background: linear-gradient(90deg, #3498db, #2980b9);
+    }
+
+    /* 购买按钮样式 */
+    .buy-btn {
+      background: linear-gradient(45deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .buy-btn:hover {
+      background: linear-gradient(45deg, #2980b9, #3498db);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+    }
+
+    /* 已购买的商品的购买按钮样式 */
+    .store-item.purchased .buy-btn {
+      background: #95a5a6;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .store-item.purchased .buy-btn:hover {
+      background: #95a5a6;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 商店商品布局 - 横向排列 */
+    .store-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 30px;
+      justify-content: center;
+    }
+
+    /* 系列分组样式 */
+    .series-group {
+      margin-bottom: 40px;
+    }
+
+    .series-title {
+      font-size: 1.5em;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #ecf0f1;
+      text-align: center;
+    }
+
+    /* 商店容器 */
+    .store-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* 商店底部按钮区域 */
+    .store-bottom-area {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #ecf0f1;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .store-bottom-btn {
+      min-width: 150px;
+    }
+
+    /* ================ 商店美化样式结束 ================ */
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .screen {
+        margin: 10px;
+        padding: 20px;
+      }
+      
+      #home h1 {
+        font-size: 2em;
+      }
+      
+      #home .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      #draw {
+        padding: 15px;
+      }
+      
+      .sea-top-left {
+        position: relative;
+        top: auto;
+        left: auto;
+        margin: 10px;
+        width: 100%;
+        max-width: 320px;
+      }
+      
+      .sea-top-right,
+      .sea-bottom-left {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        margin: 10px;
+      }
+      
+      .sea-top-right {
+        align-items: center;
+      }
+      
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .npc-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .ocean-dialog-choices,
+      .bikini-dialog-choices,
+      .rescue-dialog-choices {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      /* 移动端对话框调整 */
+      .ocean-dialog-container,
+      .bikini-dialog-container,
+      .rescue-dialog-container {
+        top: 20px;
+        width: 95%;
+        max-height: 80vh;
+      }
+      
+      .ocean-dialog-content,
+      .bikini-dialog-content,
+      .rescue-dialog-content {
+        max-height: 150px;
+        font-size: 1em;
+      }
+      
+      .ocean-dialog-choices .btn,
+      .bikini-dialog-choices .btn,
+      .rescue-dialog-choices .btn {
+        min-width: 100%;
+        margin: 5px 0;
+      }
+      
+      /* 移动端商店调整 - 横向滚动 */
+      .store-items {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 15px;
+        margin-left: -10px;
+        margin-right: -10px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      
+      .store-item {
+        flex: 0 0 auto;
+        width: 180px;
+      }
+      
+      .series-group {
+        margin-bottom: 30px;
+      }
+      
+      .store-bottom-area {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .store-bottom-btn {
+        width: 100%;
+        max-width: 250px;
+      }
+      
+      /* 进度条在移动端调整 */
+      .progress-series-title {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .progress-series-title .count {
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+ <!-- ① 首页（粉蓝色全背景） -->
+<section id="home" class="screen">
+  <h1>互动式电子海洋</h1>
+  <div class="image-frame">
+    <img src="assets/home-image.png" alt="海洋场景" class="frame-image">
+  </div>
+  <div class="button-group">
+    <button id="btnStart" class="btn">开始绘画</button>
+    <button id="goToSeaFromHome" class="btn">进入海洋</button>
+    <button id="goToStoryMode" class="btn">剧情模式</button>
+  </div>
+</section>
+
+  <!-- ② 画板（渐变白色背景） -->
+  <section id="draw" class="screen hidden">
+    <h2>画一条你的小鱼</h2>
+    <div class="shell-count" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.9); padding: 10px 15px; border-radius: 10px;">贝壳数量: <span id="shellCountDraw">0</span></div>
+    <button id="toStoreBtnDraw" class="btn store-btn-draw" style="position: absolute; top: 70px; right: 20px;">
+      <img src="assets/store.png" alt="商店" class="store-icon">
+    </button>
+    <div style="display: flex; justify-content: center; margin: 20px 0;">
+      <canvas id="canvas" width="500" height="500" style="background: rgba(255, 255, 255, 0.9); border-radius: 10px; border: 2px solid rgba(52, 152, 219, 0.3); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);"></canvas>
+    </div>
+    <div class="toolbar" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px 0;">
+      <input type="color" id="color" value="#409eff" style="height: 40px; width: 60px; border-radius: 5px; border: 1px solid #ddd;">
+      <input type="range" id="lineWidth" min="2" max="20" value="4" style="width: 150px;">
+      <button id="undo" class="btn">撤销</button>
+      <button id="eraser" class="btn">橡皮</button>
+      <button id="clear" class="btn">清空</button>
+      <button id="submit" class="btn">完成 / 提交</button>
+      <button id="goToSea" class="btn">进入海洋</button>
+    </div>
+    <div class="storyBox" style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+      <input id="fishName" maxlength="12" placeholder="给小鱼起名字（12字内）" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 200px;">
+      <input id="story" maxlength="20" placeholder="一句20字内介绍" style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 300px;">
+    </div>
+  </section>
+
+  <!-- ③ 海洋（改进左上角按钮布局） -->
+ <section id="sea" class="screen hidden">
+  <canvas id="ocean"></canvas>
+  
+  <!-- 左上角按钮组 - 网格布局，不叠在一起 -->
+  <div class="sea-top-left">
+    <button id="feedBtn" class="btn">喂食小鱼</button>
+    <button id="showFishes" class="btn fish-manage-btn">管理</button>
+    <button id="clearDataBtn" class="btn" title="清除所有用户数据，包括绘制的小鱼、购买记录、贝壳和鱼食">清除所有数据</button>
+    <button id="back" class="btn">← 返回绘画</button>
+  </div>
+  
+  <!-- 左下角按钮 -->
+  <div class="sea-bottom-left">
+    <button id="changeBgBtn" class="btn">更换背景</button>
+  </div>
+  
+  <!-- 右上角信息 -->
+  <div class="sea-top-right">
+    <div class="shell-count">贝壳数量: <span id="shellCountSea">0</span></div>
+    <div class="shell-count">鱼食数量: <span id="fishFoodCount">0</span></div>
+    <button id="toStoreBtnSea" class="btn store-btn-sea">
+      <img src="assets/store.png" alt="商店" class="store-icon">
+    </button>
+  </div>
+  
+  <div id="fishListPanel" class="fish-list-panel">
+    <h3>我的小鱼列表</h3>
+    <div id="fishItems" class="fish-items"></div>
+  </div>
+</section>
+
+<!-- ⑥ 背景选择 -->
+<section id="backgroundSelector" class="screen hidden">
+  <h2>选择海洋背景</h2>
+  <div class="background-options">
+    <div class="background-item" data-bg="sea">
+      <img src="assets/sea.png" alt="海洋背景1">
+      <span>背景一</span>
+    </div>
+    <div class="background-item" data-bg="seaone">
+      <img src="assets/seaone.png" alt="海洋背景1">
+      <span>背景二</span>
+    </div>
+    <div class="background-item" data-bg="seatwo">
+      <img src="assets/seatwo.png" alt="海洋背景2">
+      <span>背景三</span>
+    </div>
+    <div class="background-item" data-bg="seathree">
+      <img src="assets/seathree.png" alt="海洋背景3">
+      <span>背景四</span>
+    </div>
+  </div>
+  <button id="backToSeaFromBg" class="btn back-btn">← 返回海洋</button>
+</section>
+
+  <!-- ④ 商店 -->
+  <section id="store" class="screen hidden">
+    <div class="store-container">
+      <h2>海洋商店</h2>
+      <div class="shell-count">贝壳数量: <span id="shellCountStore">0</span></div>
+      
+      <!-- 购买进度提示 -->
+      <div id="purchaseProgress" class="purchase-progress-series">
+        <!-- 海绵宝宝系列 -->
+        <div class="progress-series">
+          <div class="progress-series-title">
+            <span>海绵宝宝系列</span>
+            <span class="count"><span id="spongebobCount">0</span>/4</span>
+          </div>
+          <div class="progress-bar">
+            <div id="spongebobProgress" class="progress-fill spongebob-progress"></div>
+          </div>
+        </div>
+        
+        <!-- 小鲤鱼历险记系列 -->
+        <div class="progress-series">
+          <div class="progress-series-title">
+            <span>小鲤鱼历险记系列</span>
+            <span class="count"><span id="fishAdventureCount">0</span>/4</span>
+          </div>
+          <div class="progress-bar">
+            <div id="fishAdventureProgress" class="progress-fill fish-adventure-progress"></div>
+          </div>
+        </div>
+        
+        <!-- 海底总动员系列 -->
+        <div class="progress-series">
+          <div class="progress-series-title">
+            <span>海底总动员系列</span>
+            <span class="count"><span id="findingNemoCount">0</span>/4</span>
+          </div>
+          <div class="progress-bar">
+            <div id="findingNemoProgress" class="progress-fill finding-nemo-progress"></div>
+          </div>
+        </div>
+      </div>      
+
+      <!-- 海绵宝宝系列 -->
+      <div class="series-group">
+        <h3 class="series-title">海绵宝宝系列</h3>
+        <div class="store-items">
+          <div class="store-item" data-id="spongebob" data-price="20" data-series="spongebob">
+            <div class="item-image">
+              <img src="assets/spongebob.png" alt="海绵宝宝" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海绵宝宝</h3>
+              <p>我准备好了！我准备好了！</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="patrick" data-price="30" data-series="spongebob">
+            <div class="item-image">
+              <img src="assets/patrick.png" alt="派大星" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>派大星</h3>
+              <p>海绵宝宝我们去抓水母吧</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="squidward" data-price="40" data-series="spongebob">
+            <div class="item-image">
+              <img src="assets/squidward.png" alt="章鱼哥" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>章鱼哥</h3>
+              <p>艺术是我的生命！让我安静地吹我的单簧管...</p>
+              <div class="item-price">40 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="krabs" data-price="50" data-series="spongebob">
+            <div class="item-image">
+              <img src="assets/krabs.png" alt="蟹老板" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>蟹老板</h3>
+              <p>钱！钱！钱！我最爱钱！</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 小鲤鱼历险记系列 -->
+      <div class="series-group">
+        <h3 class="series-title">小鲤鱼历险记系列</h3>
+        <div class="store-items">
+          <div class="store-item" data-id="paopao" data-price="20" data-series="fishAdventure">
+            <div class="item-image">
+              <img src="assets/paopao.png" alt="泡泡" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>泡泡</h3>
+              <p>我就是火热的泡泡！</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="meimei" data-price="30" data-series="fishAdventure">
+            <div class="item-image">
+              <img src="assets/meimei.png" alt="小美美" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>小美美</h3>
+              <p>歌声是最美的语言</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="shuangmiangui" data-price="40" data-series="fishAdventure">
+            <div class="item-image">
+              <img src="assets/shuangmiangui.png" alt="双面龟" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>双面龟</h3>
+              <p>我有两张脸，但我很真诚</p>
+              <div class="item-price">40 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="aku" data-price="50" data-series="fishAdventure">
+            <div class="item-image">
+              <img src="assets/aku.png" alt="阿酷" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>阿酷</h3>
+              <p>冷静思考，智慧取胜</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 海底总动员系列 -->
+      <div class="series-group">
+        <h3 class="series-title">海底总动员系列</h3>
+        <div class="store-items">
+          <div class="store-item" data-id="nemo" data-price="20" data-series="findingNemo">
+            <div class="item-image">
+              <img src="assets/nemo.png" alt="尼莫" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>尼莫</h3>
+              <p>我只是一条小鱼，但我很勇敢！</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="dory" data-price="30" data-series="findingNemo">
+            <div class="item-image">
+              <img src="assets/dory.png" alt="多莉" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>多莉</h3>
+              <p>我是多莉，我会找到我的家人！</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="marlin" data-price="40" data-series="findingNemo">
+            <div class="item-image">
+              <img src="assets/marlin.png" alt="马林" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>马林</h3>
+              <p>我会保护我的儿子，不惜一切代价！</p>
+              <div class="item-price">40 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="bruce" data-price="50" data-series="findingNemo">
+            <div class="item-image">
+              <img src="assets/bruce.png" alt="布鲁斯" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>布鲁斯</h3>
+              <p>我们是朋友，不是食物！</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 背景商品 -->
+      <div class="series-group">
+        <h3 class="series-title">背景系列</h3>
+        <div class="store-items">
+          <div class="store-item" data-id="haimianbaobao" data-price="30" data-type="background">
+            <div class="item-image">
+              <img src="assets/haimianbaobao.png" alt="海绵宝宝背景" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海绵宝宝背景</h3>
+              <p>永远年轻，永远理想主义</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="xiaoliyu" data-price="30" data-type="background">
+            <div class="item-image">
+              <img src="assets/xiaoliyu.png" alt="小鲤鱼历险记背景" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>小鲤鱼历险记背景</h3>
+              <p>我心如铁，坚不可摧</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="haidizongdongyuan" data-price="30" data-type="background">
+            <div class="item-image">
+              <img src="assets/haidizongdongyuan.png" alt="海底总动员背景" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海底总动员背景</h3>
+              <p>爱与勇气的海洋冒险</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 物品商品 -->
+      <div class="series-group">
+        <h3 class="series-title">装饰物品</h3>
+        <div class="store-items">
+          <div class="store-item" data-id="seaweed" data-price="20">
+            <div class="item-image">
+              <img src="assets/seaweed.png" alt="海草" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海草</h3>
+              <p>像一棵海草海草</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="reef" data-price="30">
+            <div class="item-image">
+              <img src="assets/reef.png" alt="礁石" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>礁石</h3>
+              <p>一块沉默的礁石...</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+
+          <div class="store-item" data-id="coral" data-price="25">
+            <div class="item-image">
+              <img src="assets/coral.png" alt="珊瑚" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>珊瑚</h3>
+              <p>美丽的珊瑚丛，海洋中的宝石</p>
+              <div class="item-price">25 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>    
+
+          <div class="store-item" data-id="fishfood" data-price="1">
+            <div class="item-image">
+              <img src="assets/fishfood.png" alt="鱼食" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>鱼食</h3>
+              <p>可以喂小鱼的美味食物（可重复购买）</p>
+              <div class="item-price">1 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- 独立的按钮区域，在商店容器下方 - 已删除剧情模式按钮 -->
+      <div class="store-bottom-area">
+        <button id="backToSeaFromStore" class="store-bottom-btn back-to-sea-btn">返回海洋</button>
+        <button id="backFromStore" class="store-bottom-btn back-to-draw-btn">返回绘画</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 海绵宝宝冒险场景 -->
+  <section id="spongebobAdventure" class="screen hidden">
+    <div class="adventure-container">
+      <div class="adventure-scene">
+        <img src="assets/home1.jpg" alt="海绵宝宝冒险场景" class="adventure-background">
+        
+        <div class="character-spongebob">
+          <img src="assets/spongebob.png" alt="海绵宝宝" class="adventure-character">
+        </div>
+        
+        <div class="character-user-fish">
+          <!-- 用户的小鱼会动态插入到这里 -->
+        </div>
+        
+        <div class="dialogue-container">
+          <div class="dialogue-box spongebob-dialogue">
+            <div class="speaker">海绵宝宝</div>
+            <div class="message" id="spongebobMessage"></div>
+          </div>
+          
+          <div class="dialogue-box userfish-dialogue hidden">
+            <div class="speaker" id="userFishName">你的小鱼</div>
+            <div class="message" id="userFishMessage"></div>
+          </div>
+        </div>
+        
+        <div class="adventure-controls">
+          <button id="nextDialogue" class="btn adventure-btn">继续对话</button>
+          <button id="skipAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+          <button id="goToSeaFromAdventure" class="btn adventure-btn hidden">前往海洋</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- ====================== 剧情模式部分 ====================== -->
+<!-- ① 剧情首页 -->
+<section id="storyModeHome" class="screen hidden">
+  <h1 class="story-title">海底冒险剧情模式</h1>
+  <div class="image-frame">
+    <img src="assets/home-image.png" alt="海洋场景" class="frame-image">
+  </div>
+  <div class="button-group">
+    <button id="goToOceanAdventure" class="btn">海底四乐章冒险</button>
+    <button id="goToBikiniStory" class="btn">比奇堡故事线</button>
+    <button id="goToRescueAdventure" class="btn">拯救洋流大冒险</button>
+    <button id="backToMainFromStory" class="btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">← 返回主系统</button>
+  </div>
+</section>
+
+<!-- ② 海底四乐章冒险 -->
+<section id="oceanAdventure" class="screen hidden">
+  <h2>海底四乐章冒险</h2>
+  <button id="backToStoryHome" class="btn" style="position: absolute; top: 20px; left: 20px;">← 返回首页</button>
+  
+  <!-- NPC列表 -->
+  <div class="npc-list" style="margin-top: 70px;">
+    <div class="npc-item" id="npc-bubble">
+      <h3>泡泡（海底沙地）</h3>
+      <button class="talk-btn" data-npc="bubble" data-system="ocean">开始对话</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-aku">
+      <h3>阿酷（沉船峡谷）</h3>
+      <button class="talk-btn" data-npc="aku" data-system="ocean" disabled>商店解锁</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-meimei">
+      <h3>小美美（海藻森林）</h3>
+      <button class="talk-btn" data-npc="meimei" data-system="ocean" disabled>商店解锁</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-tortoise">
+      <h3>双面龟（珊瑚迷宫）</h3>
+      <button class="talk-btn" data-npc="tortoise" data-system="ocean" disabled>商店解锁</button>
+    </div>
+  </div>
+
+  <!-- 修改：对话展示区域 - 固定位置 -->
+  <div class="ocean-dialog-container">
+    <div class="ocean-dialog-speaker"></div>
+    <div class="ocean-dialog-content"></div>
+    <div class="ocean-dialog-choices"></div>
+  </div>
+</section>
+
+<!-- ③ 比奇堡故事线 -->
+<section id="bikiniStory" class="screen hidden">
+  <h2>比奇堡故事线</h2>
+  <button id="backToStoryHome2" class="btn" style="position: absolute; top: 20px; left: 20px;">← 返回首页</button>
+  
+  <!-- NPC列表 -->
+  <div class="npc-list" style="margin-top: 70px;">
+    <div class="npc-item" id="npc-spongebob">
+      <h3>海绵宝宝（沙滩）</h3>
+      <button class="talk-btn" data-npc="spongebob" data-system="bikini">开始对话</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-patrick">
+      <h3>派大星（石头下）</h3>
+      <button class="talk-btn" data-npc="patrick" data-system="bikini" disabled>商店解锁</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-squidward">
+      <h3>章鱼哥（艺术小屋）</h3>
+      <button class="talk-btn" data-npc="squidward" data-system="bikini" disabled>商店解锁</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-mr-crab">
+      <h3>蟹老板（蟹堡王办公室）</h3>
+      <button class="talk-btn" data-npc="mr-crab" data-system="bikini" disabled>商店解锁</button>
+    </div>
+  </div>
+
+  <!-- 修改：对话展示区域 - 固定位置 -->
+  <div class="bikini-dialog-container">
+    <div class="bikini-dialog-speaker"></div>
+    <div class="bikini-dialog-content"></div>
+    <div class="bikini-dialog-choices"></div>
+  </div>
+</section>
+
+<!-- ④ 拯救洋流大冒险 -->
+<section id="rescueAdventure" class="screen hidden">
+  <h2>拯救洋流大冒险</h2>
+  <button id="backToStoryHome3" class="btn" style="position: absolute; top: 20px; left: 20px;">← 返回首页</button>
+  
+  <!-- NPC列表 -->
+  <div class="npc-list" style="margin-top: 70px;">
+    <div class="npc-item" id="npc-nemo">
+      <h3>尼莫（珊瑚礁）</h3>
+      <button class="talk-btn" data-npc="nemo" data-system="rescue">开始对话</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-dory">
+      <h3>多莉（海藻林）</h3>
+      <button class="talk-btn" data-npc="dory" data-system="rescue" disabled>商店解锁</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-marlin">
+      <h3>马琳（礁石区）</h3>
+      <button class="talk-btn" data-npc="marlin" data-system="rescue" disabled>商店解锁</button>
+    </div>
+    <div class="npc-item npc-locked" id="npc-bruce">
+      <h3>布鲁斯（深海洞穴）</h3>
+      <button class="talk-btn" data-npc="bruce" data-system="rescue" disabled>商店解锁</button>
+    </div>
+  </div>
+
+  <!-- 修改：对话展示区域 - 固定位置 -->
+  <div class="rescue-dialog-container">
+    <div class="rescue-dialog-speaker"></div>
+    <div class="rescue-dialog-content"></div>
+    <div class="rescue-dialog-choices"></div>
+  </div>
+</section>
+
+  <script src="js/common.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/ocean.js"></script>
+  <script>
+    // 页面切换功能
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.add('hidden');
+      });
+      
+      const targetScreen = document.getElementById(screenId);
+      if (targetScreen) {
+        targetScreen.classList.remove('hidden');
+        
+        // 如果切换到商店页面，刷新商店状态
+        if (screenId === 'store') {
+          setTimeout(refreshStoreItems, 50);
+        }
+        
+        // 如果切换到剧情模式页面，刷新NPC解锁状态
+        if (['oceanAdventure', 'bikiniStory', 'rescueAdventure'].includes(screenId)) {
+          setTimeout(refreshUnlockedNPCs, 50);
+        }
+      }
+    }
+
+    // 基础事件绑定
+    document.addEventListener('DOMContentLoaded', function() {
+      // 首页按钮
+      document.getElementById('btnStart')?.addEventListener('click', () => showScreen('draw'));
+      document.getElementById('goToSeaFromHome')?.addEventListener('click', () => showScreen('sea'));
+      document.getElementById('goToStoryMode')?.addEventListener('click', goToStoryMode);
+      
+      // 其他页面的返回按钮
+      document.getElementById('back')?.addEventListener('click', () => showScreen('draw'));
+      document.getElementById('goToSea')?.addEventListener('click', () => showScreen('sea'));
+      
+      // 商店按钮
+      document.getElementById('toStoreBtnDraw')?.addEventListener('click', () => showScreen('store'));
+      document.getElementById('toStoreBtnSea')?.addEventListener('click', () => showScreen('store'));
+      
+      // 商店返回按钮
+      document.getElementById('backFromStore')?.addEventListener('click', () => showScreen('draw'));
+      document.getElementById('backToSeaFromStore')?.addEventListener('click', () => showScreen('sea'));
+      // 注意：已删除商店中的剧情模式按钮事件绑定
+      
+      // 剧情模式返回按钮
+      document.getElementById('backToMainFromStory')?.addEventListener('click', backToMainSystem);
+      
+      // 初始化剧情模式
+      initStoryMode();
+      
+      // 设置商店购买监听器
+      setupStorePurchaseListener();
+      
+      // 初始加载时刷新商店状态和NPC解锁状态
+      setTimeout(() => {
+        refreshStoreItems();
+        refreshUnlockedNPCs();
+      }, 500);
+      
+      // 初始化对话系统
+      setTimeout(() => {
+        DialogSystem.init();
+      }, 800);
+    });
+  </script>
+  
+  <!-- 商店 JavaScript -->
+  <script>
+    // 获取已购买的商品列表
+    function getPurchasedItems() {
+      try {
+        const purchased = localStorage.getItem('purchasedItems');
+        if (!purchased || purchased === '[]' || purchased === '') {
+          return [];
+        }
+        return JSON.parse(purchased);
+      } catch (e) {
+        console.error('解析已购买物品失败:', e);
+        return [];
+      }
+    }
+
+    // 刷新商店商品状态
+    function refreshStoreItems() {
+      console.log('刷新商店商品状态...');
+      
+      const purchasedItems = getPurchasedItems();
+      const purchasedIds = purchasedItems.map(item => item.id);
+      
+      // 更新每个商品的状态
+      document.querySelectorAll('.store-item').forEach(item => {
+        const itemId = item.dataset.id;
+        const buyBtn = item.querySelector('.buy-btn');
+        
+        if (purchasedIds.includes(itemId)) {
+          // 已购买
+          item.classList.add('purchased');
+          
+          // 添加已购买标签
+          if (!item.querySelector('.purchased-badge')) {
+            const badge = document.createElement('div');
+            badge.className = 'purchased-badge';
+            badge.textContent = '已购买';
+            item.appendChild(badge);
+          }
+          
+          // 更新按钮文字和状态
+          if (buyBtn) {
+            buyBtn.textContent = '已购买';
+            buyBtn.disabled = true;
+            buyBtn.style.cursor = 'not-allowed';
+          }
+        } else {
+          // 未购买
+          item.classList.remove('purchased');
+          
+          // 移除已购买标签
+          const badge = item.querySelector('.purchased-badge');
+          if (badge) {
+            badge.remove();
+          }
+          
+          // 更新按钮文字和状态
+          if (buyBtn) {
+            buyBtn.textContent = '购买';
+            buyBtn.disabled = false;
+            buyBtn.style.cursor = 'pointer';
+          }
+        }
+      });
+      
+      // 更新进度条
+      updateProgressBars(purchasedIds);
+      
+      console.log('商店商品状态刷新完成');
+    }
+
+    // 更新进度条
+    function updateProgressBars(purchasedIds) {
+      // 定义每个系列的角色
+      const seriesItems = {
+        spongebob: ['spongebob', 'patrick', 'squidward', 'krabs'],
+        fishAdventure: ['paopao', 'aku', 'meimei', 'shuangmiangui'],
+        findingNemo: ['nemo', 'dory', 'marlin', 'bruce']
+      };
+      
+      // 更新每个系列的进度
+      Object.keys(seriesItems).forEach(seriesId => {
+        const items = seriesItems[seriesId];
+        const purchasedCount = items.filter(id => purchasedIds.includes(id)).length;
+        const totalCount = items.length;
+        const percentage = (purchasedCount / totalCount) * 100;
+        
+        // 更新计数显示
+        const countElement = document.getElementById(`${seriesId}Count`);
+        if (countElement) {
+          countElement.textContent = purchasedCount;
+        }
+        
+        // 更新进度条宽度
+        const progressElement = document.getElementById(`${seriesId}Progress`);
+        if (progressElement) {
+          progressElement.style.width = `${percentage}%`;
+        }
+      });
+    }
+
+    // 商店购买功能
+    document.addEventListener('DOMContentLoaded', function() {
+      // 购买按钮事件
+      document.querySelectorAll('.buy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const storeItem = this.closest('.store-item');
+          const itemId = storeItem.dataset.id;
+          const price = parseInt(storeItem.dataset.price);
+          
+          // 获取当前贝壳数量
+          let shells = parseInt(localStorage.getItem('shellCount') || '0');
+          
+          if (shells >= price) {
+            // 扣除贝壳
+            shells -= price;
+            localStorage.setItem('shellCount', shells);
+            
+            // 更新贝壳显示
+            document.querySelectorAll('#shellCountDraw, #shellCountSea, #shellCountStore').forEach(el => {
+              el.textContent = shells;
+            });
+            
+            // 保存购买记录
+            let purchasedItems = JSON.parse(localStorage.getItem('purchasedItems') || '[]');
+            if (!purchasedItems.some(item => item.id === itemId)) {
+              purchasedItems.push({ id: itemId, price: price, date: new Date().toISOString() });
+              localStorage.setItem('purchasedItems', JSON.stringify(purchasedItems));
+            }
+            
+            // 显示购买成功消息
+            alert('购买成功！');
+            
+            // 立即刷新商店状态
+            refreshStoreItems();
+            
+            // 触发购买成功事件（这是关键！）
+            const purchaseEvent = new CustomEvent('storePurchaseSuccess', {
+              detail: { itemId: itemId }
+            });
+            document.dispatchEvent(purchaseEvent);
+            
+            // 调用全局刷新函数
+            if (window.refreshUnlockedNPCs) {
+              window.refreshUnlockedNPCs();
+            }
+          } else {
+            alert('贝壳不足，无法购买！');
+          }
+        });
+      });
+    });
+  </script>
+  
+  <!-- 剧情模式核心 JavaScript -->
+  <script>
+    // ====================== 剧情模式核心功能 ======================
+    
+    // 切换到剧情模式
+    function goToStoryMode() {
+      showScreen('storyModeHome');
+      document.body.classList.add('story-mode');
+    }
+
+    // 返回主系统
+    function backToMainSystem() {
+      showScreen('home');
+      document.body.classList.remove('story-mode');
+    }
+
+    // 角色ID到NPC ID的映射表（商店商品ID -> 剧情模式NPC ID）
+    const characterToNPC = {
+      // 海绵宝宝系列（比奇堡故事线）
+      'spongebob': { npcId: 'spongebob', system: 'bikini', name: '海绵宝宝' },
+      'patrick': { npcId: 'patrick', system: 'bikini', name: '派大星' },
+      'squidward': { npcId: 'squidward', system: 'bikini', name: '章鱼哥' },
+      'krabs': { npcId: 'mr-crab', system: 'bikini', name: '蟹老板' },
+      
+      // 小鲤鱼历险记系列（海底四乐章冒险）
+      'paopao': { npcId: 'bubble', system: 'ocean', name: '泡泡' },
+      'aku': { npcId: 'aku', system: 'ocean', name: '阿酷' },
+      'meimei': { npcId: 'meimei', system: 'ocean', name: '小美美' },
+      'shuangmiangui': { npcId: 'tortoise', system: 'ocean', name: '双面龟' },
+      
+      // 海底总动员系列（拯救洋流大冒险）
+      'nemo': { npcId: 'nemo', system: 'rescue', name: '尼莫' },
+      'dory': { npcId: 'dory', system: 'rescue', name: '多莉' },
+      'marlin': { npcId: 'marlin', system: 'rescue', name: '马琳' },
+      'bruce': { npcId: 'bruce', system: 'rescue', name: '布鲁斯' }
+    };
+
+    // 获取已解锁的角色列表
+    function getUnlockedCharacters() {
+      try {
+        const purchased = localStorage.getItem('purchasedItems');
+        if (!purchased || purchased === '[]' || purchased === '') {
+          return [];
+        }
+        
+        const items = JSON.parse(purchased);
+        
+        // 只返回角色类型的物品（在characterToNPC中有映射的）
+        const unlocked = items.filter(item => {
+          return characterToNPC[item.id] !== undefined;
+        }).map(item => item.id);
+        
+        return unlocked;
+      } catch (e) {
+        console.error('解析已购买物品失败:', e);
+        return [];
+      }
+    }
+
+    // 检查并解锁NPC - 核心修复函数
+    function refreshUnlockedNPCs() {
+      console.log('开始刷新NPC解锁状态...');
+      
+      const unlockedCharacters = getUnlockedCharacters();
+      console.log('已解锁的角色:', unlockedCharacters);
+      
+      // 遍历所有映射关系
+      Object.entries(characterToNPC).forEach(([characterId, npcInfo]) => {
+        const npcElementId = `npc-${npcInfo.npcId}`;
+        const npcItem = document.getElementById(npcElementId);
+        
+        if (!npcItem) {
+          console.warn(`找不到NPC元素: ${npcElementId}`);
+          return;
+        }
+        
+        const talkBtn = npcItem.querySelector('.talk-btn');
+        if (!talkBtn) {
+          console.warn(`NPC ${npcElementId} 没有对话按钮`);
+          return;
+        }
+        
+        // 检查是否已解锁
+        const isUnlocked = unlockedCharacters.includes(characterId);
+        
+        // 设置不同系统的样式
+        const systemStyles = {
+          ocean: { 
+            btnBg: '#2e8b57',
+            btnHover: '#1e6b3f',
+          },
+          bikini: { 
+            btnBg: '#ff8c00',
+            btnHover: '#e67a00',
+          },
+          rescue: { 
+            btnBg: '#0066cc',
+            btnHover: '#0052a3',
+          }
+        };
+        
+        const styles = systemStyles[npcInfo.system] || systemStyles.ocean;
+        
+        if (isUnlocked) {
+          // 已解锁状态
+          console.log(`解锁NPC: ${npcInfo.name}`);
+          
+          // 移除锁定样式
+          npcItem.classList.remove('npc-locked');
+          npcItem.style.opacity = '1';
+          npcItem.style.filter = 'none';
+          
+          // 启用按钮
+          talkBtn.disabled = false;
+          talkBtn.textContent = '开始对话';
+          talkBtn.style.cursor = 'pointer';
+          talkBtn.style.opacity = '1';
+          talkBtn.style.background = styles.btnBg;
+          talkBtn.style.color = 'white';
+          
+          // 添加解锁动画
+          if (!npcItem.classList.contains('npc-unlocked')) {
+            npcItem.classList.add('npc-unlocked');
+            setTimeout(() => {
+              npcItem.classList.remove('npc-unlocked');
+            }, 3000);
+          }
+        } else {
+          // 未解锁状态（但泡泡、海绵宝宝、尼莫默认解锁）
+          const defaultUnlocked = ['bubble', 'spongebob', 'nemo'];
+          if (!defaultUnlocked.includes(npcInfo.npcId)) {
+            npcItem.classList.add('npc-locked');
+            npcItem.style.opacity = '0.6';
+            npcItem.style.filter = 'grayscale(70%)';
+            
+            // 禁用按钮
+            talkBtn.disabled = true;
+            talkBtn.textContent = '商店解锁';
+            talkBtn.style.cursor = 'not-allowed';
+            talkBtn.style.opacity = '0.7';
+            talkBtn.style.background = '#95a5a6';
+          }
+        }
+      });
+      
+      console.log('NPC解锁状态刷新完成');
+    }
+
+    // 监听商店购买事件
+    function setupStorePurchaseListener() {
+      console.log('设置商店购买事件监听器...');
+      
+      // 监听商店购买成功的自定义事件
+      document.addEventListener('storePurchaseSuccess', function(event) {
+        console.log('收到storePurchaseSuccess事件:', event.detail);
+        
+        const itemId = event.detail?.itemId;
+        if (itemId && characterToNPC[itemId]) {
+          const npcInfo = characterToNPC[itemId];
+          console.log(`购买了角色: ${itemId}, 对应NPC: ${npcInfo.npcId}`);
+          
+          // 立即刷新解锁状态
+          refreshUnlockedNPCs();
+          
+          // 显示解锁提示
+          const systemNames = {
+            ocean: '海底四乐章冒险',
+            bikini: '比奇堡故事线',
+            rescue: '拯救洋流大冒险'
+          };
+          
+          const message = `🎉 已解锁 ${npcInfo.name} 的剧情！现在可以在${systemNames[npcInfo.system]}中对话了。`;
+          showNotification(message);
+        }
+      });
+    }
+
+    // 显示通知
+    function showNotification(message) {
+      // 移除已有的通知
+      document.querySelectorAll('.unlock-notification').forEach(el => el.remove());
+      
+      // 创建一个通知元素
+      const notification = document.createElement('div');
+      notification.className = 'unlock-notification';
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(45deg, #4CAF50, #45a049);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideIn 0.5s ease, fadeOut 0.5s ease 3s forwards;
+        max-width: 350px;
+        font-weight: bold;
+        font-size: 14px;
+      `;
+      
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      // 3.5秒后移除
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3500);
+    }
+
+    // 初始化剧情模式页面切换
+    function initStoryMode() {
+      console.log('初始化剧情模式...');
+      
+      // 绑定剧情模式页面切换
+      document.getElementById('goToOceanAdventure')?.addEventListener('click', () => {
+        showScreen('oceanAdventure');
+      });
+      
+      document.getElementById('goToBikiniStory')?.addEventListener('click', () => {
+        showScreen('bikiniStory');
+      });
+      
+      document.getElementById('goToRescueAdventure')?.addEventListener('click', () => {
+        showScreen('rescueAdventure');
+      });
+
+      // 绑定返回按钮事件
+      document.getElementById('backToStoryHome')?.addEventListener('click', () => {
+        showScreen('storyModeHome');
+      });
+      
+      document.getElementById('backToStoryHome2')?.addEventListener('click', () => {
+        showScreen('storyModeHome');
+      });
+      
+      document.getElementById('backToStoryHome3')?.addEventListener('click', () => {
+        showScreen('storyModeHome');
+      });
+      
+      console.log('剧情模式初始化完成');
+    }
+
+    // ====================== 剧情模式对话系统 ======================
+    const DialogSystem = {
+      // 状态管理
+      state: {
+        ocean: { currentNpc: null, currentIndex: 0 },
+        bikini: { currentNpc: null, currentIndex: 0 },
+        rescue: { currentNpc: null, currentIndex: 0 }
+      },
+
+      // 修改：优化对话框显示位置
+      startDialog(systemType, npcId, dialogData, currentIndex) {
+        console.log(`开始对话: system=${systemType}, npc=${npcId}, index=${currentIndex}`);
+        
+        if (!dialogData || !dialogData[npcId]) {
+          console.error(`[${systemType}] 找不到该NPC的对话数据:`, npcId);
+          return { success: false };
+        }
+
+        const sectionId = systemType === 'ocean' ? 'oceanAdventure' : 
+                         systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure';
+        const sectionEl = document.getElementById(sectionId);
+        const dialogContainer = sectionEl.querySelector(`.${systemType}-dialog-container`);
+        const speakerEl = dialogContainer.querySelector(`.${systemType}-dialog-speaker`);
+        const contentEl = dialogContainer.querySelector(`.${systemType}-dialog-content`);
+        const choicesEl = dialogContainer.querySelector(`.${systemType}-dialog-choices`);
+
+        const currentDialog = dialogData[npcId][currentIndex];
+        if (!currentDialog) {
+          console.error(`[${systemType}] 找不到该索引的对话:`, npcId, currentIndex);
+          return { success: false };
+        }
+
+        // 重置容器状态
+        choicesEl.innerHTML = '';
+        dialogContainer.style.display = 'block';
+        
+        // 确保对话框在顶部可见
+        dialogContainer.style.top = '50px';
+        dialogContainer.style.zIndex = '1000';
+
+        // 渲染对话内容
+        speakerEl.textContent = currentDialog.speaker;
+        contentEl.textContent = currentDialog.content;
+
+        // 生成选项按钮
+        currentDialog.choices.forEach((choice) => {
+          const choiceBtn = document.createElement('button');
+          choiceBtn.textContent = choice.text;
+          choiceBtn.className = 'btn';
+          choiceBtn.style.margin = '5px';
+          choiceBtn.style.minWidth = '150px';
+          
+          // 按系统区分按钮颜色
+          const btnColorMap = {
+            ocean: { normal: "#2e8b57", hover: "#1e6b3f" },
+            bikini: { normal: "#ff8c00", hover: "#e67a00" },
+            rescue: { normal: "#0066cc", hover: "#0052a3" }
+          };
+          const colors = btnColorMap[systemType];
+          choiceBtn.style.background = colors.normal;
+          
+          // 添加hover效果
+          choiceBtn.addEventListener('mouseover', () => {
+            choiceBtn.style.background = colors.hover;
+            choiceBtn.style.transform = 'translateY(-2px)';
+          });
+          choiceBtn.addEventListener('mouseout', () => {
+            choiceBtn.style.background = colors.normal;
+            choiceBtn.style.transform = 'translateY(0)';
+          });
+        
+          choiceBtn.addEventListener('click', () => {
+            if (choice.unlock) {
+              this.unlockNpc(systemType, choice.unlock);
+            }
+            this.handleChoice(systemType, choice);
+          });
+          
+          choicesEl.appendChild(choiceBtn);
+        });
+
+        // 滚动到对话框位置
+        setTimeout(() => {
+          dialogContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+
+        return { success: true, container: dialogContainer };
+      },
+
+      // 通用NPC解锁函数
+      unlockNpc(systemType, unlockNpcId) {
+        console.log(`解锁NPC: ${unlockNpcId} (系统: ${systemType})`);
+        
+        const nextNpcItem = document.getElementById(`npc-${unlockNpcId}`);
+        if (!nextNpcItem) {
+          console.warn(`[${systemType}] 要解锁的NPC不存在:`, unlockNpcId);
+          return null;
+        }
+
+        const nextNpcBtn = nextNpcItem.querySelector('.talk-btn');
+        if (!nextNpcBtn) {
+          console.warn(`[${systemType}] NPC ${unlockNpcId} 没有对话按钮`);
+          return null;
+        }
+
+        // 启用按钮
+        nextNpcBtn.disabled = false;
+        nextNpcBtn.textContent = '开始对话';
+        nextNpcBtn.style.cursor = 'pointer';
+        nextNpcBtn.style.opacity = '1';
+        
+        // 滚动到解锁的NPC
+        nextNpcItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return nextNpcBtn;
+      },
+
+      // 选择处理函数
+      handleChoice(systemType, choice) {
+        const state = this.state[systemType];
+        const sectionId = systemType === 'ocean' ? 'oceanAdventure' : 
+                         systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure';
+        const sectionEl = document.getElementById(sectionId);
+        const dialogContainer = sectionEl.querySelector(`.${systemType}-dialog-container`);
+        
+        if (choice.next !== null && choice.next !== undefined) {
+          state.currentIndex = choice.next;
+          const dialogData = this.dialogData[systemType];
+          this.startDialog(systemType, state.currentNpc, dialogData, state.currentIndex);
+        } else {
+          // 关闭对话容器，重置状态
+          dialogContainer.style.display = 'none';
+          state.currentNpc = null;
+          state.currentIndex = 0;
+        }
+      },
+
+      // 绑定对话按钮事件
+      bindEvents(systemType, dialogData) {
+        const sectionId = systemType === 'ocean' ? 'oceanAdventure' : 
+                         systemType === 'bikini' ? 'bikiniStory' : 'rescueAdventure';
+        const sectionEl = document.getElementById(sectionId);
+        
+        if (!sectionEl) {
+          console.error(`找不到剧情章节: ${sectionId}`);
+          return;
+        }
+        
+        sectionEl.querySelectorAll('.talk-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            console.log('点击对话按钮:', e.currentTarget.dataset);
+            
+            if (e.currentTarget.disabled) {
+              console.log('按钮被禁用，无法开始对话');
+              return;
+            }
+            
+            const npcId = e.currentTarget.dataset.npc;
+            const system = e.currentTarget.dataset.system;
+            const state = this.state[system];
+            
+            state.currentNpc = npcId;
+            state.currentIndex = 0;
+            
+            console.log(`开始与 ${npcId} 对话 (系统: ${system})`);
+            this.startDialog(system, npcId, dialogData, state.currentIndex);
+          });
+        });
+      },
+
+      // 对话数据存储
+      dialogData: {
+        // ====================== 1. 海底四乐章冒险对话数据 ======================
+        ocean: {
+          "bubble": [
+            {
+              speaker: "泡泡",
+              content: "旅行者，我正在海底沙地的彩虹石阵旁发愁呢！阿酷总提什么‘悲伤美学’，小美美那边也遇上了麻烦…你想先了解哪件事？",
+              choices: [
+                { text: "追问‘悲伤美学’是什么", next: 1, unlock: "aku" },
+                { text: "直接问小美美的事", next: 3, unlock: "aku" }
+              ]
+            },
+            {
+              speaker: "泡泡",
+              content: "阿酷说悲伤也有独特的美学价值，但我总觉得快乐才是最珍贵的！你觉得呢？",
+              choices: [
+                { text: "安慰他：快乐艺术才最珍贵", next: 2 },
+                { text: "建议他：表现出快乐的重量", next: 2 }
+              ]
+            },
+            {
+              speaker: "泡泡",
+              content: "谢谢你的理解！不管怎样，石塔倒塌后露出了前往阿酷沉船峡谷的线索，你快去找他吧，记得带上我给你的彩虹螺壳和勇气核心石！",
+              choices: [
+                { text: "收下物品，前往找阿酷", next: null }
+              ]
+            },
+            {
+              speaker: "泡泡",
+              content: "小美美被梭子蟹监视了，他们想采集她的声波！你想知道更多细节吗？",
+              choices: [
+                { text: "问：他们具体想做什么", next: 4 },
+                { text: "问：阿酷对此怎么看", next: 4 }
+              ]
+            },
+            {
+              speaker: "泡泡",
+              content: "阿酷说需要声波探测器才能帮小美美！这是我找到的探测器，你拿上去找阿酷吧，他在沉船峡谷等着呢，还有彩虹螺壳和安全小路情报给你！",
+              choices: [
+                { text: "收下探测器，去找阿酷", next: null }
+              ]
+            }
+          ],
+          "aku": [
+            {
+              speaker: "阿酷",
+              content: "你带着泡泡的彩虹螺壳来了？我正验证它的光纹呢…小美美需要‘共鸣校准器’才能摆脱监视，你想先了解肥鲶鱼的事，还是我的研究？",
+              choices: [
+                { text: "问肥鲶鱼手下的事", next: 1, unlock: "meimei" },
+                { text: "问你的宇宙不确定性研究课题", next: 3, unlock: "meimei" }
+              ]
+            },
+            {
+              speaker: "阿酷",
+              content: "肥鲶鱼的手下一直在收集海底能量，他们的警告语我都记下来了…你想知道他们的最终目标吗？",
+              choices: [
+                { text: "记下警告语就行", next: 2 },
+                { text: "追问他们的最终目标", next: 2 }
+              ]
+            },
+            {
+              speaker: "阿酷",
+              content: "不管怎样，这是共鸣校准器和光纹干扰器！梭子蟹的录音设备会失灵1分钟，你快去海藻森林找小美美吧，她急需帮助！",
+              choices: [
+                { text: "收下物品，去找小美美", next: null }
+              ]
+            },
+            {
+              speaker: "阿酷",
+              content: "我的研究需要更多数据才能帮小美美，你愿意协助我吗？",
+              choices: [
+                { text: "愿意助力你的研究", next: 4 },
+                { text: "问研究和小美的麻烦关联", next: 4 }
+              ]
+            },
+            {
+              speaker: "阿酷",
+              content: "谢谢你的配合！这是共鸣校准器和巡逻盲区路径，海藻森林的路更安全了，快去找到小美美，她的珍珠麦克风快撑不住了！",
+              choices: [
+                { text: "收下物品，去找小美美", next: null }
+              ]
+            }
+          ],
+          "meimei": [
+            {
+              speaker: "小美美",
+              content: "你带着阿酷的共鸣校准器来了！梭子蟹还在监视我，我的珍珠麦克风里有初代海妖颤音…你更关心麦克风的故事，还是监视的现状？",
+              choices: [
+                { text: "关注麦克风与海妖的故事", next: 1, unlock: "tortoise" },
+                { text: "关注监视现状和双面龟的事", next: 3, unlock: "tortoise" }
+              ]
+            },
+            {
+              speaker: "小美美",
+              content: "这颗珍珠麦克风是海妖的遗物，只要带着心意演奏，声音就能被海底所有生物感受到…你觉得我该怎么做？",
+              choices: [
+                { text: "鼓励她：心意能被感受", next: 2 },
+                { text: "建议她：用精确方法演奏", next: 2 }
+              ]
+            },
+            {
+              speaker: "小美美",
+              content: "谢谢你的鼓励！珍珠光芒稳定了，这是诚意鳞片（会变色），还有星贝情绪阈值的情报，你快去珊瑚迷宫找双面龟吧，他有《海底声学秘典》的线索！",
+              choices: [
+                { text: "收下鳞片，去找双面龟", next: null }
+              ]
+            },
+            {
+              speaker: "小美美",
+              content: "双面龟说梭子蟹的监视网有漏洞，但他好像藏了些事…你觉得他在撒谎吗？还是想知道《海底声学秘典》203页的事？",
+              choices: [
+                { text: "问：说明他在撒谎？", next: 4 },
+                { text: "问《海底声学秘典》203页", next: 4 }
+              ]
+            },
+            {
+              speaker: "小美美",
+              content: "双面龟没撒谎，只是怕肥鲶鱼报复！这是珊瑚迷宫的坐标和信任暗号，你拿上诚意鳞片去找他吧，他能帮你拿到《秘典》203页！",
+              choices: [
+                { text: "收下暗号，去找双面龟", next: null }
+              ]
+            }
+          ],
+          "tortoise": [
+            {
+              speaker: "双面龟",
+              content: "你带着小美的诚意鳞片来了！我已经三重验证过了，想要《海底声学秘典》203页，得用‘深渊共振液’来换…你想先问注意事项，还是肥鲶鱼的危险？",
+              choices: [
+                { text: "问注意事项和古籍148页", next: 1 },
+                { text: "问肥鲶鱼的目的和危险", next: 3 }
+              ]
+            },
+            {
+              speaker: "双面龟",
+              content: "古籍148页是肥鲶鱼的弱点！去北海礁黑市交易时要冷静，你知道该怎么应对肥鲶鱼吗？",
+              choices: [
+                { text: "冷静问应对方法", next: 2 },
+                { text: "分享情报辅助你分析", next: 2 }
+              ]
+            },
+            {
+              speaker: "双面龟",
+              content: "做得好！这是密封星贝容器和短期记忆强化液（能让肥鲶鱼记忆周期缩到5分钟），去黑市交易时提‘想要148页'能分心他，快去完成任务吧！",
+              choices: [
+                { text: "收下容器，前往北海礁黑市", next: null }
+              ]
+            },
+            {
+              speaker: "双面龟",
+              content: "肥鲶鱼想要用深渊共振液激活海妖颤音，控制整个海底洋流！你要立刻出发，还是先设置假情报？",
+              choices: [
+                { text: "接受任务立刻离开", next: 4 },
+                { text: "提议设置假情报节点", next: 4 }
+              ]
+            },
+            {
+              speaker: "双面龟",
+              content: "太聪明了！这是带诱饵数据包的密封星贝容器，能帮你争取验证时间，去北海礁黑市找肥鲶鱼交易时，一定要诱他说出‘古籍第148页’！",
+              choices: [
+                { text: "收下容器，执行交易任务", next: null }
+              ]
+            }
+          ]
+        },
+
+        // ====================== 2. 比奇堡故事线对话数据 ======================
+        bikini: {
+          "spongebob": [
+            {
+              speaker: "海绵宝宝",
+              content: "嘿！新朋友！看我的‘永不沉没比奇堡号’沙堡！派大星居然说沙子是‘星星碎渣渣’，就因为他捡了块发光的星核石！你觉得沙子做的沙堡很酷对不对？",
+              choices: [
+                { text: "超酷！沙堡做得超棒", next: 1, unlock: "patrick" },
+                { text: "一般般吧，沙子确实普通", next: 2, unlock: "patrick" }
+              ]
+            },
+            {
+              speaker: "海绵宝宝",
+              content: "哇！谢谢你的认可！派大星就在那边石头底下，整天抱着星核石‘思考人生’，你可以去找他聊聊～ 对了，章鱼哥在他的艺术小屋，他超爱被夸有才华！",
+              choices: [
+                { text: "好呀，去看看派大星", next: null }
+              ]
+            },
+            {
+              speaker: "海绵宝宝",
+              content: "哼，派大星也这么说！不过他的星核石确实有点神奇，凉飕飕硬邦邦的～ 你去问问他呗，说不定他会分享给你看！章鱼哥就在旁边小屋，记得别惹他生气哦！",
+              choices: [
+                { text: "好吧，去找派大星问问", next: null }
+              ]
+            }
+          ],
+          "patrick": [
+            {
+              speaker: "派大星",
+              content: "嘘…我在和星核石‘调频’呢！它说想它的宇宙兄弟姐妹了～ 你身上有没有那种凉飕飕、硬邦邦、从很远地方来的味道？",
+              choices: [
+                { text: "没有呀，我没带这种石头", next: 1, unlock: "squidward" },
+                { text: "有！你看这个（掏出星核石）", next: 3, unlock: "squidward" }
+              ]
+            },
+            {
+              speaker: "派大星",
+              content: "哦…那太可惜了，我脑子今天缺‘星际润滑油’～ 隔壁章鱼哥吹竖笛超催眠，但他自尊心比水母皮还薄！你得会‘哄’他才能聊，想去试试吗？",
+              choices: [
+                { text: "去看看章鱼哥的艺术", next: 2 },
+                { text: "不想聊，换个目标", next: 2 }
+              ]
+            },
+            {
+              speaker: "派大星",
+              content: "章鱼哥的小屋就在那边！记得夸他的画或竖笛，别直接说看不懂～ 蟹老板的蟹堡王也在附近，他啥情报都要‘诚意’换！",
+              choices: [
+                { text: "记下了，出发", next: null }
+              ]
+            },
+            {
+              speaker: "派大星",
+              content: "哇！波长对上了！这手感比海蜗牛的梦还冰凉！你从哪儿搞到的？快让我摸摸～ 章鱼哥肯定会嫉妒这个‘宇宙级宝贝’，你可以拿给他看看，说不定他会对你改观！",
+              choices: [
+                { text: "好，带去找章鱼哥", next: null }
+              ]
+            }
+          ],
+          "squidward": [
+            {
+              speaker: "章鱼哥",
+              content: "又是被海绵宝宝带过来的？走开！我的灵感正在难产…等等，你身上有没有‘没被钱玷污的欣赏者’气质？",
+              choices: [
+                { text: "假装懂：这画充满内心挣扎，超有深度", next: 1, unlock: "mr-crab" },
+                { text: "直接问：这画到底画的是啥？", next: 3, unlock: "mr-crab" }
+              ]
+            },
+            {
+              speaker: "章鱼哥",
+              content: "哼，还算你有点眼光！比奇堡只有我和蟹阿金懂‘价值’——他满脑子钞票，啥都能标价！你要情报就得带‘诚意’找他，我只需要艺术赞助～ 你想去蟹堡王吗？",
+              choices: [
+                { text: "去蟹堡王找蟹老板", next: 2 },
+                { text: "还是算了，先逛逛", next: 2 }
+              ]
+            },
+            {
+              speaker: "章鱼哥",
+              content: "蟹堡王在沙滩东边，后门进去就是他办公室！记得别提‘免费’两个字，他会炸毛的～",
+              choices: [
+                { text: "收到，出发去蟹堡王", next: null }
+              ]
+            },
+            {
+              speaker: "章鱼哥",
+              content: "出去！庸俗的人不配进我的殿堂！（暴躁赶人）… 等等，要找蟹老板就从东边走，他的办公室在蟹堡王后门，记得带‘诚意’——他的情报可不免费！",
+              choices: [
+                { text: "知道了，去找蟹老板", next: null }
+              ]
+            }
+          ],
+          "mr-crab": [
+            {
+              speaker: "蟹老板",
+              content: "进来前蹭蹭脚！我这儿不欢迎免费的灰～ 新来的？想打听比奇堡的事？很好！时间就是钱，等价交换懂不懂？亮出你的‘诚意’，我就展开我的情报网！",
+              choices: [
+                { text: "问：你说的‘诚意’是指什么？", next: 1 },
+                { text: "问：痞老板最近有啥小动作？", next: 1 }
+              ]
+            },
+            {
+              speaker: "蟹老板",
+              content: "诚意？当然是能换钱的东西！或者帮我盯着痞老板——他最近偷偷摸摸搞小动作，肯定想偷我的蟹黄堡秘方！想直接见他？得是‘超级大投资’才行！你愿意做笔交易吗？",
+              choices: [
+                { text: "愿意，我带了‘诚意’", next: 2 },
+                { text: "算了，暂时没兴趣", next: 2 }
+              ]
+            },
+            {
+              speaker: "蟹老板",
+              content: "识时务者为俊杰！（搓钳子）随时来找我兑现交易，只要价码合适，比奇堡没有我找不到的情报～ 痞老板的老巢在蟹堡王对面，你可别自己闯进去！",
+              choices: [
+                { text: "记下了，谢谢蟹老板", next: null }
+              ]
+            }
+          ]
+        },
+
+        // ====================== 3. 拯救洋流大冒险对话数据 ======================
+        rescue: {
+          "nemo": [
+            {
+              speaker: "尼莫",
+              content: "哇！你长得不像这片海的鱼！看我的发光珊瑚——一闪安全、两闪小心、三闪危险！现在三闪啦！你想知道珊瑚为啥神奇，还是直接问危险是什么？",
+              choices: [
+                { text: "哇！珊瑚好神奇，到底啥危险？", next: 1, unlock: "dory" },
+                { text: "危险？是鲨鱼还是人类扔垃圾了？", next: 3, unlock: "dory" }
+              ]
+            },
+            {
+              speaker: "尼莫",
+              content: "是北边海藻林的洋流乱啦！好多小鱼迷路找爸爸妈妈～ 我爸爸马琳是洋流专家，多莉阿姨熟路（就是记性偶尔掉线）！你觉得是什么挡住了水流？",
+              choices: [
+                { text: "可能是人类的废弃渔网缠住礁石了", next: 2 },
+                { text: "说不定是超大礁石挡路了", next: 2 }
+              ]
+            },
+            {
+              speaker: "尼莫",
+              content: "耶！我也这么觉得！多莉阿姨在海藻林等我们，她知道漩涡的位置～ 快跟我来，咱们组队找她汇合！",
+              choices: [
+                { text: "好，出发去海藻林找多莉", next: null }
+              ]
+            },
+            {
+              speaker: "尼莫",
+              content: "不是鲨鱼哦！是洋流出问题啦～ 大概率是人类的废弃渔网缠住礁石！我爸爸马琳在礁石区观察，多莉阿姨在海藻林找渔网位置，咱们先去找多莉吧？",
+              choices: [
+                { text: "走！去找多莉阿姨", next: null }
+              ]
+            }
+          ],
+          "dory": [
+            {
+              speaker: "多莉",
+              content: "帮手！新朋友！太好了！海藻林深处有旋转漩涡，我差点被卷进去～ 你想知道漩涡的方向，还是想确认是不是渔网搞的鬼？",
+              choices: [
+                { text: "旋转漩涡在哪？你能带我去吗？", next: 1, unlock: "marlin" },
+                { text: "漩涡是因为渔网缠住礁石了吗？你记不记得位置？", next: 3, unlock: "marlin" }
+              ]
+            },
+            {
+              speaker: "尼莫（补充）",
+              content: "多莉阿姨记路超准，但偶尔忘方向！她上次说跟着‘唱歌的贝壳’能找到漩涡——水流一冲就叮叮当当响！我爸爸在礁石区等我们，先找他更安全～",
+              choices: [
+                { text: "好，先去礁石区找马琳", next: 2 },
+                { text: "直接跟着唱歌的贝壳找漩涡", next: 2 }
+              ]
+            },
+            {
+              speaker: "多莉",
+              content: "对！唱歌的贝壳！礁石区在东边，我带你去～ 马琳肯定想好办法了！",
+              choices: [
+                { text: "出发去礁石区", next: null }
+              ]
+            },
+            {
+              speaker: "尼莫（补充）",
+              content: "对！就是渔网！多莉阿姨说渔网缠在有好多彩色小贝壳的礁石上！我爸爸已经在观察漩涡水流了，咱们快去找他，他知道怎么拆渔网～",
+              choices: [
+                { text: "走，去找马琳汇合", next: null }
+              ]
+            }
+          ],
+          "marlin": [
+            {
+              speaker: "马琳",
+              content: "感谢你帮忙，朋友！确实是废弃渔网缠住礁石形成人工漩涡，挡偏了洋流～ 你想直接用潜水刀拆渔网，还是担心力气不够想找帮手？",
+              choices: [
+                { text: "直接拆！我有潜水刀", next: 1, unlock: "bruce" },
+                { text: "渔网肯定很结实，要不要找帮手？", next: 3, unlock: "bruce" }
+              ]
+            },
+            {
+              speaker: "尼莫（提醒）",
+              content: "不行呀！漩涡中心水流太急，会被渔网缠住的！潜水刀也割不断粗渔网～ 我爸爸说布鲁斯叔叔是深海‘温柔大力士’，能咬断渔网，还爱吃多莉阿姨的海藻饼干！",
+              choices: [
+                { text: "那去找布鲁斯帮忙", next: 2 },
+                { text: "再想想其他办法", next: 2 }
+              ]
+            },
+            {
+              speaker: "马琳",
+              content: "布鲁斯住在深海洞穴，尼莫带你去采集发光贝壳（照明用），我和多莉去取海藻饼干，咱们在洞穴入口汇合～",
+              choices: [
+                { text: "好，分工行动，去深海洞穴", next: null }
+              ]
+            },
+            {
+              speaker: "尼莫（兴奋）",
+              content: "对！我和爸爸、多莉阿姨试过拉渔网，根本拉不动！布鲁斯叔叔最靠谱了！我知道哪里有发光贝壳，带你去采集，爸爸和多莉去拿海藻饼干，洞穴入口汇合～",
+              choices: [
+                { text: "走，采集发光贝壳去", next: 4 },
+                { text: "我先去洞穴入口等你们", next: 4 }
+              ]
+            },
+            {
+              speaker: "多莉",
+              content: "海藻饼干在左边第三块大礁石下（石头上有粉色海葵）！我取完就去洞穴入口找你们～",
+              choices: [
+                { text: "收到，出发去深海洞穴", next: null }
+              ]
+            }
+          ],
+          "bruce": [
+            {
+              speaker: "布鲁斯",
+              content: "马琳！多莉！尼莫！还有新朋友，欢迎欢迎！这些发光贝壳真漂亮，正好能照亮漩涡中心～ 你们找我是想让我帮忙拆渔网，还是单纯来送海藻饼干呀？",
+              choices: [
+                { text: "布鲁斯，求你帮忙拆渔网！小鱼们都迷路了", next: 1 },
+                { text: "这是多莉做的海藻饼干，想请你一起拯救洋流", next: 3 }
+              ]
+            },
+            {
+              speaker: "尼莫（补充）",
+              content: "布鲁斯叔叔，漩涡水流好急，好多小鱼差点被卷进去，我们拆不动渔网，只能找你帮忙了！",
+              choices: [
+                { text: "拜托你了，布鲁斯", next: 2 }
+              ]
+            },
+            {
+              speaker: "布鲁斯",
+              content: "没问题！帮助海洋伙伴义不容辞！多莉的手艺还是这么好～ 尼莫待在安全区帮我们照亮渔网，咱们分工合作，现在出发去漩涡区！",
+              choices: [
+                { text: "冲呀！拯救洋流大冒险！", next: null }
+              ]
+            },
+            {
+              speaker: "尼莫（补充）",
+              content: "布鲁斯叔叔，有你的力气一定能拆了渔网！让洋流恢复正常，小鱼们就能回家啦！",
+              choices: [
+                { text: "一起加油！", next: 4 }
+              ]
+            },
+            {
+              speaker: "布鲁斯",
+              content: "太感谢啦！这是我的最爱～ 尼莫长大了真勇敢！你待在马琳身边照明渔网细节，咱们现在出发，清理掉渔网！",
+              choices: [
+                { text: "出发去漩涡区！", next: null }
+              ]
+            }
+          ]
+        }
+      },
+
+      // 初始化所有事件绑定
+      init() {
+        console.log('初始化对话系统...');
+        
+        // 先刷新解锁状态
+        refreshUnlockedNPCs();
+        
+        // 绑定事件
+        this.bindEvents('ocean', this.dialogData.ocean);
+        this.bindEvents('bikini', this.dialogData.bikini);
+        this.bindEvents('rescue', this.dialogData.rescue);
+        
+        console.log('对话系统初始化完成');
+      }
+    };
+
+    // 添加解锁动画CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+      
+      .npc-unlocked {
+        animation: unlockPulse 1s ease-in-out;
+        border-color: #4CAF50 !important;
+        box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+      }
+      
+      @keyframes unlockPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+      
+      /* 对话框选项区域始终可见 */
+      .ocean-dialog-choices,
+      .bikini-dialog-choices,
+      .rescue-dialog-choices {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 10px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 10;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // 使函数全局可用
+    window.refreshUnlockedNPCs = refreshUnlockedNPCs;
+    window.refreshStoreItems = refreshStoreItems;
+  </script>
+</body>
+</html>
