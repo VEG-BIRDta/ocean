@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <title></title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+ <!-- ① 首页 -->
+<section id="home" class="screen">
+  <h1></h1>
+  <div class="image-frame">
+    <img src="assets/home-image.png" alt="海洋场景" class="frame-image">
+  </div>
+  <div class="button-group">
+    <button id="btnStart" class="btn">开始绘画</button>
+    <button id="goToSeaFromHome" class="btn">进入海洋</button>
+  </div>
+</section>
+
+
+  <!-- ② 画板 -->
+  <section id="draw" class="screen hidden">
+    <h2>画一条你的小鱼</h2>
+    <div class="shell-count">贝壳数量: <span id="shellCountDraw">0</span></div>
+    <button id="toStoreBtnDraw" class="btn store-btn-draw">
+      <img src="assets/store.png" alt="商店" class="store-icon">
+    </button>
+    <canvas id="canvas" width="700" height="400"></canvas>
+    <div class="toolbar">
+      <input type="color" id="color" value="#409eff">
+      <input type="range" id="lineWidth" min="2" max="20" value="4">
+      <button id="undo" class="btn">撤销</button>
+      <button id="eraser" class="btn">橡皮</button>
+      <button id="clear" class="btn">清空</button>
+      <button id="submit" class="btn">完成 / 提交</button>
+      <button id="goToSea" class="btn">进入海洋</button>
+    </div>
+    <div class="storyBox">
+      <input id="fishName" maxlength="12" placeholder="给小鱼起名字（12字内）">
+      <input id="story" maxlength="20" placeholder="一句20字内介绍">
+    </div>
+  </section>
+
+  <!-- ③ 海洋 -->
+ <section id="sea" class="screen hidden">
+  <canvas id="ocean"></canvas>
+  <div class="shell-count">贝壳数量: <span id="shellCountSea">0</span></div>
+  <div class="shell-count" style="top: 60px;">鱼食数量: <span id="fishFoodCount">0</span></div>
+  <button id="back" class="btn">← 返回绘画</button>
+  <button id="showFishes" class="btn fish-manage-btn">管理</button>
+  <button id="clearDataBtn" class="btn" style="top: 200px; right: 20px; background-color: #e74c3c;" title="清除所有用户数据，包括绘制的小鱼、购买记录、贝壳和鱼食">清除所有数据</button>
+  <button id="feedBtn" class="btn" style="top: 70px; left: 20px; position: absolute;">喂食小鱼</button>
+  <button id="toStoreBtnSea" class="btn store-btn-sea">
+    <img src="assets/store.png" alt="商店" class="store-icon">
+  </button>
+  <!-- 新增背景选择按钮 -->
+  <button id="changeBgBtn" class="btn" style="bottom: 100px; left: 20px; position: absolute;">更换背景</button>
+  <div id="fishListPanel" class="fish-list-panel">
+    <h3>我的小鱼列表</h3>
+    <div id="fishItems" class="fish-items">
+  </div>
+</section>
+
+<!-- ⑥ 背景选择 -->
+<section id="backgroundSelector" class="screen hidden">
+  <h2>选择海洋背景</h2>
+  <div class="background-options">
+    <div class="background-item" data-bg="sea">
+      <img src="assets/sea.png" alt="海洋背景1">
+      <span>背景一</span>
+    </div>
+    <div class="background-item" data-bg="seaone">
+      <img src="assets/seaone.png" alt="海洋背景1">
+      <span>背景二</span>
+    </div>
+    <div class="background-item" data-bg="seatwo">
+      <img src="assets/seatwo.png" alt="海洋背景2">
+      <span>背景三</span>
+    </div>
+    <div class="background-item" data-bg="seathree">
+      <img src="assets/seathree.png" alt="海洋背景3">
+      <span>背景四</span>
+    </div>
+  </div>
+  <button id="backToSeaFromBg" class="btn back-btn">← 返回海洋</button>
+</section>
+
+
+  <!-- ④ 商店 -->
+  <section id="store" class="screen hidden">
+    <div class="store-container">
+      <h2>海洋商店</h2>
+      <div class="shell-count">贝壳数量: <span id="shellCountStore">0</span></div>
+      
+      <!-- 购买进度提示 -->
+      <div id="purchaseProgress" class="purchase-progress-series">
+        <!-- 海绵宝宝系列 -->
+        <div class="progress-series">
+          <div class="progress-series-title">
+            <span>海绵宝宝系列</span>
+            <span class="count"><span id="spongebobCount">0</span>/4</span>
+          </div>
+          <div class="progress-bar">
+            <div id="spongebobProgress" class="progress-fill spongebob-progress"></div>
+          </div>
+        </div>
+        
+        <!-- 小鲤鱼历险记系列 -->
+        <div class="progress-series">
+          <div class="progress-series-title">
+            <span>小鲤鱼历险记系列</span>
+            <span class="count"><span id="fishAdventureCount">0</span>/4</span>
+          </div>
+          <div class="progress-bar">
+            <div id="fishAdventureProgress" class="progress-fill fish-adventure-progress"></div>
+          </div>
+        </div>
+        
+        <!-- 海底总动员系列 -->
+        <div class="progress-series">
+          <div class="progress-series-title">
+            <span>海底总动员系列</span>
+            <span class="count"><span id="findingNemoCount">0</span>/4</span>
+          </div>
+          <div class="progress-bar">
+            <div id="findingNemoProgress" class="progress-fill finding-nemo-progress"></div>
+          </div>
+        </div>
+
+        <div class="store-categories">
+            <button class="category-btn active" data-category="characters">角色</button>
+            <button class="category-btn" data-category="backgrounds">背景</button>
+            <button class="category-btn" data-category="items">装饰物品</button>
+        </div>
+      </div>      
+
+      <div class="store-items">
+        <!-- 角色商品 -->
+        <div class="items-category characters active">
+          <!-- 海绵宝宝系列 -->
+          <div class="store-item" data-id="spongebob" data-price="20">
+            <div class="item-image">
+              <img src="assets/spongebob.png" alt="海绵宝宝" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海绵宝宝</h3>
+              <p>我准备好了！我准备好了！</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="patrick" data-price="30">
+            <div class="item-image">
+              <img src="assets/patrick.png" alt="派大星" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>派大星</h3>
+              <p>海绵宝宝我们去抓水母吧</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="squidward" data-price="40">
+            <div class="item-image">
+              <img src="assets/squidward.png" alt="章鱼哥" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>章鱼哥</h3>
+              <p>艺术是我的生命！让我安静地吹我的单簧管...</p>
+              <div class="item-price">40 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="krabs" data-price="50">
+            <div class="item-image">
+              <img src="assets/krabs.png" alt="蟹老板" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>蟹老板</h3>
+              <p>钱！钱！钱！我最爱钱！</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <!-- 小鲤鱼历险记系列 -->
+          <div class="store-item" data-id="paopao" data-price="20">
+            <div class="item-image">
+              <img src="assets/paopao.png" alt="泡泡" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>泡泡</h3>
+              <p>我就是火热的泡泡！</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="meimei" data-price="30">
+            <div class="item-image">
+              <img src="assets/meimei.png" alt="小美美" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>小美美</h3>
+              <p>歌声是最美的语言</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="shuangmiangui" data-price="40">
+            <div class="item-image">
+              <img src="assets/shuangmiangui.png" alt="双面龟" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>双面龟</h3>
+              <p>我有两张脸，但我很真诚</p>
+              <div class="item-price">40 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="aku" data-price="50">
+            <div class="item-image">
+              <img src="assets/aku.png" alt="阿酷" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>阿酷</h3>
+              <p>冷静思考，智慧取胜</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <!-- 海底总动员系列 -->
+          <div class="store-item" data-id="nemo" data-price="20">
+            <div class="item-image">
+              <img src="assets/nemo.png" alt="尼莫" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>尼莫</h3>
+              <p>我只是一条小鱼，但我很勇敢！</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="dory" data-price="30">
+            <div class="item-image">
+              <img src="assets/dory.png" alt="多莉" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>多莉</h3>
+              <p>我是多莉，我会找到我的家人！</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="marlin" data-price="40">
+            <div class="item-image">
+              <img src="assets/marlin.png" alt="马林" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>马林</h3>
+              <p>我会保护我的儿子，不惜一切代价！</p>
+              <div class="item-price">40 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="bruce" data-price="50">
+            <div class="item-image">
+              <img src="assets/bruce.png" alt="布鲁斯" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>布鲁斯</h3>
+              <p>我们是朋友，不是食物！</p>
+              <div class="item-price">50 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      <!-- 背景商品 -->
+        <div class="items-category backgrounds">
+    <div class="store-item" data-id="haimianbaobao" data-price="30" data-type="background">
+      <div class="item-image">
+        <img src="assets/haimianbaobao.png" alt="海绵宝宝背景" class="item-img">
+      </div>
+      <div class="item-info">
+        <h3>海绵宝宝背景</h3>
+        <p>永远年轻，永远理想主义</p>
+        <div class="item-price">30 贝壳</div>
+      </div>
+      <button class="buy-btn">购买</button>
+    </div>
+    
+    <div class="store-item" data-id="xiaoliyu" data-price="30" data-type="background">
+      <div class="item-image">
+        <img src="assets/xiaoliyu.png" alt="小鲤鱼历险记背景" class="item-img">
+      </div>
+      <div class="item-info">
+        <h3>小鲤鱼历险记背景</h3>
+        <p>我心如铁，坚不可摧</p>
+        <div class="item-price">30 贝壳</div>
+      </div>
+      <button class="buy-btn">购买</button>
+    </div>
+    
+    <div class="store-item" data-id="haidizongdongyuan" data-price="30" data-type="background">
+      <div class="item-image">
+        <img src="assets/haidizongdongyuan.png" alt="海底总动员背景" class="item-img">
+      </div>
+      <div class="item-info">
+        <h3>海底总动员背景</h3>
+        <p>爱与勇气的海洋冒险</p>
+        <div class="item-price">30 贝壳</div>
+      </div>
+      <button class="buy-btn">购买</button>
+    </div>
+  </div>
+</div>
+        
+        <!-- 物品商品 -->
+        <div class="items-category items">
+          <div class="store-item" data-id="seaweed" data-price="20">
+            <div class="item-image">
+              <img src="assets/seaweed.png" alt="海草" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>海草</h3>
+              <p>像一棵海草海草</p>
+              <div class="item-price">20 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+          
+          <div class="store-item" data-id="reef" data-price="30">
+            <div class="item-image">
+              <img src="assets/reef.png" alt="礁石" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>礁石</h3>
+              <p>一块沉默的礁石...</p>
+              <div class="item-price">30 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+
+          <div class="store-item" data-id="coral" data-price="25">
+              <div class="item-image">
+                  <img src="assets/coral.png" alt="珊瑚" class="item-img">
+              </div>
+              <div class="item-info">
+                  <h3>珊瑚</h3>
+                  <p>美丽的珊瑚丛，海洋中的宝石 </p>
+                  <div class="item-price">25 贝壳</div>
+              </div>
+              <button class="buy-btn">购买</button>
+          </div>    
+
+          <div class="store-item" data-id="fishfood" data-price="1">
+            <div class="item-image">
+              <img src="assets/fishfood.png" alt="鱼食" class="item-img">
+            </div>
+            <div class="item-info">
+              <h3>鱼食</h3>
+              <p>可以喂小鱼的美味食物（可重复购买）</p>
+              <div class="item-price">1 贝壳</div>
+            </div>
+            <button class="buy-btn">购买</button>
+          </div>
+        </div>
+      <!-- 固定在底部的按钮 -->
+    </div>
+  
+  <!-- 独立的按钮区域，在商店容器下方 -->
+    <div class="store-bottom-area">
+      <button id="backToSeaFromStore" class="store-bottom-btn back-to-sea-btn">返回海洋</button>
+      <button id="backFromStore" class="store-bottom-btn back-to-draw-btn">返回绘画</button>
+    </div>
+  </section>
+
+  <!-- ⑤ 海绵宝宝冒险场景 -->
+  <section id="spongebobAdventure" class="screen hidden">
+    <div class="adventure-container">
+      <div class="adventure-scene">
+        <img src="assets/home1.jpg" alt="海绵宝宝冒险场景" class="adventure-background">
+        
+        <div class="character-spongebob">
+          <img src="assets/spongebob.png" alt="海绵宝宝" class="adventure-character">
+        </div>
+        
+        <div class="character-user-fish">
+          <!-- 用户的小鱼会动态插入到这里 -->
+        </div>
+        
+<div class="dialogue-container hidden">  <!-- 添加 hidden 类 -->
+    <div class="dialogue-box spongebob-dialogue hidden">  <!-- 添加 hidden 类 -->
+        <div class="speaker">海绵宝宝</div>
+        <div class="message" id="spongebobMessage"></div>
+    </div>
+    
+    <div class="dialogue-box userfish-dialogue hidden">
+        <div class="speaker" id="userFishName">你的小鱼</div>
+        <div class="message" id="userFishMessage"></div>
+    </div>
+</div>
+        
+        <div class="adventure-controls">
+           <button id="nextDialogue" class="btn adventure-btn">继续对话</button>
+           <button id="skipAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+      </div>
+    </div>
+  </section>
+
+<!-- ⑦ 派大星冒险场景 -->
+<section id="patrickAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home2.png" alt="派大星冒险场景" class="adventure-background">
+      
+      <!-- 派大星角色 - 使用和海绵宝宝一样的类名 -->
+      <div class="character-spongebob patrick-character-patrick">
+        <img src="assets/patrick.png" alt="派大星" class="adventure-character">
+        <div class="character-name">派大星</div>
+      </div>
+      
+      <!-- 用户小鱼角色 - 使用和海绵宝宝一样的类名 -->
+      <div class="character-user-fish patrick-character-user-fish">
+        <!-- 用户的小鱼会动态插入到这里 -->
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <!-- 对话容器 -->
+      <div class="dialogue-container patrick-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue patrick-dialogue-left hidden">
+          <div class="speaker">派大星</div>
+          <div class="message" id="patrickMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue patrick-dialogue-right hidden">
+          <div class="speaker" id="patrickUserFishName">你的小鱼</div>
+          <div class="message" id="patrickUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <!-- 控制按钮 -->
+      <div class="adventure-controls patrick-controls">
+        <button id="nextPatrickDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipPatrickAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ⑧ 章鱼哥冒险场景 -->
+<section id="squidwardAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home3.png" alt="章鱼哥冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob squidward-character-squidward">
+        <img src="assets/squidward.png" alt="章鱼哥" class="adventure-character">
+        <div class="character-name">章鱼哥</div>
+      </div>
+      
+      <div class="character-user-fish squidward-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container squidward-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue squidward-dialogue-left hidden">
+          <div class="speaker">章鱼哥</div>
+          <div class="message" id="squidwardMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue squidward-dialogue-right hidden">
+          <div class="speaker" id="squidwardUserFishName">你的小鱼</div>
+          <div class="message" id="squidwardUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls squidward-controls">
+        <button id="nextSquidwardDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipSquidwardAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑨ 蟹老板冒险场景 -->
+<section id="krabsAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home4.png" alt="蟹老板冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob krabs-character-krabs">
+        <img src="assets/krabs.png" alt="蟹老板" class="adventure-character">
+        <div class="character-name">蟹老板</div>
+      </div>
+      
+      <div class="character-user-fish krabs-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container krabs-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue krabs-dialogue-left hidden">
+          <div class="speaker">蟹老板</div>
+          <div class="message" id="krabsMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue krabs-dialogue-right hidden">
+          <div class="speaker" id="krabsUserFishName">你的小鱼</div>
+          <div class="message" id="krabsUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls krabs-controls">
+        <button id="nextKrabsDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipKrabsAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ⑩ 泡泡冒险场景 -->
+<section id="paopaoAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home5.png" alt="泡泡冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob paopao-character-paopao">
+        <img src="assets/paopao.png" alt="泡泡" class="adventure-character">
+        <div class="character-name">泡泡</div>
+      </div>
+      
+      <div class="character-user-fish paopao-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container paopao-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue paopao-dialogue-left hidden">
+          <div class="speaker">泡泡</div>
+          <div class="message" id="paopaoMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue paopao-dialogue-right hidden">
+          <div class="speaker" id="paopaoUserFishName">你的小鱼</div>
+          <div class="message" id="paopaoUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls paopao-controls">
+        <button id="nextPaopaoDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipPaopaoAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑪ 小美美冒险场景 -->
+<section id="meimeiAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home6.png" alt="小美美冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob meimei-character-meimei">
+        <img src="assets/meimei.png" alt="小美美" class="adventure-character">
+        <div class="character-name">小美美</div>
+      </div>
+      
+      <div class="character-user-fish meimei-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container meimei-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue meimei-dialogue-left hidden">
+          <div class="speaker">小美美</div>
+          <div class="message" id="meimeiMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue meimei-dialogue-right hidden">
+          <div class="speaker" id="meimeiUserFishName">你的小鱼</div>
+          <div class="message" id="meimeiUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls meimei-controls">
+        <button id="nextMeimeiDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipMeimeiAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑫ 双面龟冒险场景 -->
+<section id="shuangmianguiAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home7.png" alt="双面龟冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob shuangmiangui-character-shuangmiangui">
+        <img src="assets/shuangmiangui.png" alt="双面龟" class="adventure-character">
+        <div class="character-name">双面龟</div>
+      </div>
+      
+      <div class="character-user-fish shuangmiangui-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container shuangmiangui-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue shuangmiangui-dialogue-left hidden">
+          <div class="speaker">双面龟</div>
+          <div class="message" id="shuangmianguiMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue shuangmiangui-dialogue-right hidden">
+          <div class="speaker" id="shuangmianguiUserFishName">你的小鱼</div>
+          <div class="message" id="shuangmianguiUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls shuangmiangui-controls">
+        <button id="nextShuangmianguiDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipShuangmianguiAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑬ 阿酷冒险场景 -->
+<section id="akuAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home8.png" alt="阿酷冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob aku-character-aku">
+        <img src="assets/aku.png" alt="阿酷" class="adventure-character">
+        <div class="character-name">阿酷</div>
+      </div>
+      
+      <div class="character-user-fish aku-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container aku-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue aku-dialogue-left hidden">
+          <div class="speaker">阿酷</div>
+          <div class="message" id="akuMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue aku-dialogue-right hidden">
+          <div class="speaker" id="akuUserFishName">你的小鱼</div>
+          <div class="message" id="akuUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls aku-controls">
+        <button id="nextAkuDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipAkuAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑭ 尼莫冒险场景 -->
+<section id="nemoAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home9.png" alt="尼莫冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob nemo-character-nemo">
+        <img src="assets/nemo.png" alt="尼莫" class="adventure-character">
+        <div class="character-name">尼莫</div>
+      </div>
+      
+      <div class="character-user-fish nemo-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container nemo-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue nemo-dialogue-left hidden">
+          <div class="speaker">尼莫</div>
+          <div class="message" id="nemoMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue nemo-dialogue-right hidden">
+          <div class="speaker" id="nemoUserFishName">你的小鱼</div>
+          <div class="message" id="nemoUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls nemo-controls">
+        <button id="nextNemoDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipNemoAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑮ 多莉冒险场景 -->
+<section id="doryAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home10.png" alt="多莉冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob dory-character-dory">
+        <img src="assets/dory.png" alt="多莉" class="adventure-character">
+        <div class="character-name">多莉</div>
+      </div>
+      
+      <div class="character-user-fish dory-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container dory-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue dory-dialogue-left hidden">
+          <div class="speaker">多莉</div>
+          <div class="message" id="doryMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue dory-dialogue-right hidden">
+          <div class="speaker" id="doryUserFishName">你的小鱼</div>
+          <div class="message" id="doryUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls dory-controls">
+        <button id="nextDoryDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipDoryAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑯ 马林冒险场景 -->
+<section id="marlinAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home11.png" alt="马林冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob marlin-character-marlin">
+        <img src="assets/marlin.png" alt="马林" class="adventure-character">
+        <div class="character-name">马林</div>
+      </div>
+      
+      <div class="character-user-fish marlin-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container marlin-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue marlin-dialogue-left hidden">
+          <div class="speaker">马林</div>
+          <div class="message" id="marlinMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue marlin-dialogue-right hidden">
+          <div class="speaker" id="marlinUserFishName">你的小鱼</div>
+          <div class="message" id="marlinUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls marlin-controls">
+        <button id="nextMarlinDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipMarlinAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑰ 布鲁斯冒险场景 -->
+<section id="bruceAdventure" class="screen hidden">
+  <div class="adventure-container">
+    <div class="adventure-scene">
+      <img src="assets/home12.png" alt="布鲁斯冒险场景" class="adventure-background">
+      
+      <div class="character-spongebob bruce-character-bruce">
+        <img src="assets/bruce.png" alt="布鲁斯" class="adventure-character">
+        <div class="character-name">布鲁斯</div>
+      </div>
+      
+      <div class="character-user-fish bruce-character-user-fish">
+        <div class="character-name">你的小鱼</div>
+      </div>
+      
+      <div class="dialogue-container bruce-dialogue-container hidden">
+        <div class="dialogue-box spongebob-dialogue bruce-dialogue-left hidden">
+          <div class="speaker">布鲁斯</div>
+          <div class="message" id="bruceMessage"></div>
+        </div>
+        
+        <div class="dialogue-box userfish-dialogue bruce-dialogue-right hidden">
+          <div class="speaker" id="bruceUserFishName">你的小鱼</div>
+          <div class="message" id="bruceUserFishMessage"></div>
+        </div>
+      </div>
+      
+      <div class="adventure-controls bruce-controls">
+        <button id="nextBruceDialogue" class="btn adventure-btn">继续对话</button>
+        <button id="skipBruceAdventure" class="btn adventure-btn skip-btn">跳过冒险</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <script src="js/common.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/ocean.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/spongebob-adventure.js"></script>
+  <script src="js/patrick-adventure.js"></script>  
+  <script src="js/squidward-adventure.js"></script>
+  <script src="js/krabs-adventure.js"></script>
+  <script src="js/paopao-adventure.js"></script>
+  <script src="js/meimei-adventure.js"></script>
+  <script src="js/shuangmiangui-adventure.js"></script>
+  <script src="js/aku-adventure.js"></script>
+  <script src="js/nemo-adventure.js"></script>
+  <script src="js/dory-adventure.js"></script>
+  <script src="js/marlin-adventure.js"></script>
+  <script src="js/bruce-adventure.js"></script>
+</body>
+</html>
