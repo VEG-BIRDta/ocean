@@ -1082,13 +1082,6 @@ body, html {
   }
 }
 
-#showFishes, #clearDataBtn, #feedBtn {
-  width: 120px; /* 统一宽度 */
-  text-align: center;
-  padding: 10px 0; /* 上下内边距，左右0 */
-  left: 20px;
-  position: absolute;
-}
 
 /* 海洋界面商店按钮：使用图片作为按钮，无背景 */
 #toStoreBtnSea {
@@ -1896,3 +1889,47 @@ body, html {
     display: grid !important;
 }
 
+/* 修复清除数据按钮和更换背景按钮样式 */
+#clearDataBtn {
+  position: absolute !important;
+  top: 200px !important;
+  left: 20px !important;
+  right: auto !important; 
+  width: 170px !important; /* 因为文字较长，增加宽度 */
+  background-color: #e74c3c !important;
+  color: white !important;
+  z-index: 100 !important;
+}
+
+#changeBgBtn {
+  position: absolute !important;
+  bottom: 100px !important;
+  left: 20px !important;
+  width: 150px !important;
+  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%) !important;
+  color: white !important;
+  z-index: 100 !important;
+}
+
+/* 修改分组选择器，移除 clearDataBtn */
+#showFishes, #feedBtn {
+  width: 120px;
+  text-align: center;
+  padding: 10px 0;
+  left: 20px;
+  position: absolute;
+}
+
+/* 清除数据按钮悬停效果 */
+#clearDataBtn:hover {
+  background-color: #c0392b !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3) !important;
+}
+
+/* 更换背景按钮悬停效果 */
+#changeBgBtn:hover {
+  background: linear-gradient(135deg, #8e44ad 0%, #8e44ad 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(142, 68, 173, 0.3) !important;
+}
